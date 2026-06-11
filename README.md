@@ -72,7 +72,7 @@ CREATE USER 'exporter'@'%' IDENTIFIED BY 'ваш_пароль_экспортер
 GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
 FLUSH PRIVILEGES;
 ```
-*Контейнер `mysql-exporter` авторизуется в базе данных, используя эти учетные данные через переменную `DATA_SOURCE_NAME`.*
+*Контейнер `mysql-exporter` авторизуется в базе данных, используя эти учетные данные через переменные environment: - MYSQLD_EXPORTER_PASSWORD=${MYSQL_EXPORTER_PASSWORD} и команды - "--mysqld.username=${MYSQL_EXPORTER_USER}", - "--mysqld.address=db.3306".*
 
 ## Доступ к сервисам
 
