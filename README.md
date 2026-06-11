@@ -31,6 +31,8 @@ devops-lab/
 ├── docker-compose.yml     # Конфигурация Docker контейнеров
 ├── prometheus.yml         # Настройки сбора метрик (скрейпинг экспортеров)
 ├── .gitignore             # Исключенные из Git файлы (данные DB, .env)
+├── .env.example           # Хранение паролей и имен пользователей 
+├── promtail-config.yml    # Конфигурация Promtail
 └── README.md              # Документация проекта
 ```
 
