@@ -13,6 +13,8 @@
 * **cAdvisor** — сборщик метрик использования ресурсов на уровне каждого Docker-контейнера.
 * **Redis** — используется cAdvisor в качестве бэкенда для корректного кэширования и хранения исторических данных метрик.
 * **MySQL Exporter** — сборщик метрик производительности базы данных MySQL (метрики InnoDB, кэша, соединений и т.д.).
+* **Grafana Loki** — горизонтально масштабируемая система для хранения и индексации логов (аналог Prometheus, но для текстовых логов).
+* **Promtail** — агент сбора данных, который считывает логи контейнеров Docker с вашей системы Arch Linux и отправляет их в Loki.
 
 > **Важное замечание:** cAdvisor требует стабильного слоя хранения для корректной агрегации некоторых метрик контейнеров. Для решения этой проблемы в стек был успешно интегрирован контейнер Redis.
 
@@ -74,6 +76,21 @@ FLUSH PRIVILEGES;
 ```
 *Контейнер `mysql-exporter` авторизуется в базе данных, используя эти учетные данные через переменные environment: - MYSQLD_EXPORTER_PASSWORD=${MYSQL_EXPORTER_PASSWORD} и команды - "--mysqld.username=${MYSQL_EXPORTER_USER}", - "--mysqld.address=db.3306".*
 
+### 4. Централизованное логирование (Grafana Loki & Promtail)
+Проект автоматически собирает stdout/stderr логи всех запущенных Docker-контейнеров. 
+
+**Схема работы:**
+1. Демон Docker записывает логи контейнеров в системную директорию `/var/lib/docker/containers/`.
+2. Контейнер **Promtail** монтирует эту папку и файл `/var/run/docker.sock` для автообнаружения имен контейнеров.
+3. Promtail навешивает на логи тег `container` и отправляет их в **Loki** по адресу `http://loki:3100/loki/api/v1/push`.
+
+**Как посмотреть логи в Grafana:**
+1. Перейдите в меню **Connections** -> **Data sources** -> **Add data source**.
+2. Выберите **Loki**.
+3. В поле URL введите внутренний адрес сети Docker: `http://loki:3100`.
+4. Нажмите **Save & test**.
+5. Перейдите во вкладку **Explore**, выберите источник данных *Loki* и используйте LogQL (например, `{container="wordpress"}`) для просмотра логов в реальном времени.
+
 ## Доступ к сервисам
 
 После успешного запуска сервисы будут доступны по следующим адресам:
@@ -86,6 +103,7 @@ FLUSH PRIVILEGES;
 | **Node Exporter** | [http://localhost:9100/metrics](http://localhost:9100/metrics) | `9100` |
 | **cAdvisor** | [http://localhost:8082](http://localhost:8082) * | `8082` |
 | **MySQL Exporter** | [http://localhost:9104/metrics](http://localhost:9104/metrics) | `9104` |
+| **Grafana Loki** | [http://localhost:3100/ready](http://localhost:3100/ready) | `3100` |
 
 > *Примечание: При первом входе в Grafana стандартный логин и пароль обычно `admin` / `admin`.*
 

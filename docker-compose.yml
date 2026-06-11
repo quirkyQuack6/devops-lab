@@ -116,6 +116,23 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitor-net
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitor-net
+
 volumes:
   db_data:
   wp_data:
