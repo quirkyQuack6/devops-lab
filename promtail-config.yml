@@ -17,3 +17,5 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: 'container'
+      - replacement: 'dockerlogs'
+        target_label: 'job'

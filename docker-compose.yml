@@ -118,6 +118,7 @@ services:
 
   loki:
     image: grafana/loki:3.0.0
+    restart: always
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -126,7 +127,11 @@ services:
 
   promtail:
     image: grafana/promtail:3.0.0
+    restart: always
+    user: "0:0"
+    privileged: true
     volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
