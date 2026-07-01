@@ -1,0 +1,185 @@
+---
+- name: Deploy Docker and Prepare Environment
+  hosts: homelab
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  environment:
+    http_proxy: "http://192.168.122.1:10808"
+    https_proxy: "http://192.168.122.1:10808"
+    no_proxy: "localhost,127.0.0.1,192.168.122.0/24" 
+
+
+  tasks:
+    - name : Update apt cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Install required system tools
+      apt:
+        name:
+          - curl
+          - git
+          - ca-certificates
+        state: present
+
+    - name: Copy official Docker install script
+      copy:
+        src: "get-docker.sh"
+        dest: /tmp/get-docker.sh
+        mode: '0755'
+
+    - name: Execute Docker install script
+      command: sh /tmp/get-docker.sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Create systemd directory for docker proxy configuration
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure proxy for Docker daemon
+      copy:
+        dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+        content: |
+          [Service]
+          Environment="HTTP_PROXY=http://192.168.122.1:10808"
+          Environment="HTTPS_PROXY=http://192.168.122.1:10808"
+          Environment="NO_PROXY=localhost,127.0.0.1,192.168.122.0/24"
+        mode: '0644'
+      register: proxy_cfg
+
+    - name: Configure Docker Registry Mirrors for Russia
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "registry-mirrors": [
+              "https://mirror.gcr.io",
+              "https://daocloud.io",
+              "https://c.163.com",
+              "https://cr.yandex/mirror",
+              "https://dockerhub.timeweb.cloud",
+              "https://huecker.io",
+              "https://quay.io",
+              "https://registry.docker-cn.com"
+            ]
+          }
+        mode: '0644'
+      register: mirrors_cfg
+
+    - name: Restart docker if config changed
+      systemd:
+        daemon_reload: true
+        name: docker
+        state: restarted
+      when: proxy_cfg.changed or mirrors_cfg.changed
+
+    - name: Ensure Docker service is active and enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Create directories for homelab services configuration
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      with_items:
+        - /opt/homelab
+        - /opt/homelab/config
+        - /opt/homelab/wordpress
+        - /opt/homelab/prometheus
+        - /opt/homelab/mysql
+        - /opt/homelab/loki
+
+    - name: Create Grafana dir and set permissions
+      file:
+        path: /opt/homelab/grafana
+        state: directory
+        owner: "472"
+        group: "472"
+        mode: '0755'
+        recurse: yes 
+
+    - name: Set Grafana configs permissions
+      file:
+        path: /opt/homelab/config/grafana
+        owner: "472"
+        group: "472"
+        recurse: yes
+
+    - name: Copy Docker Compose configuratioon from host to VM
+      copy:
+        src: "../docker-compose.yml"
+        dest: "/opt/homelab/docker-compose.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy Docker Compose environment file
+      copy:
+        src: "../.env"
+        dest: "/opt/homelab/.env"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      ignore_errors: yes
+
+    - name: Copy service configurations directory
+      copy:
+        src: "../config/"
+        dest: "/opt/homelab/config"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      ignore_errors: yes
+
+    - name: Run up-to-date Docker Compose stack
+      community.docker.docker_compose_v2:
+        project_src: /opt/homelab
+        state: present
+
+    - name: Wait for Grafana
+      uri:
+        url: http://localhost:3000/api/health
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 10
+
+    - name: Wait for MySQL container
+      command: docker inspect --format='{% raw %}{{.State.Health.Status}}{% endraw %}' wp-db
+      register: mysql_health
+      until: mysql_health.stdout == "healthy"
+      retries: 12
+      delay: 5
+      ignore_errors: yes
+
+    - name: Install PyMySQL library via pip (PEP)
+      apt:
+        name: python3-pymysql
+        state: present
+
+    - name: Create exporter user
+      command: >
+        docker exec wp-db mysql -u root -p{{ mysql_root_password }} -e
+        "CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '{{ mysql_exporter_password }}';
+         GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
+         FLUSH PRIVILEGES;"
+      changed_when: true

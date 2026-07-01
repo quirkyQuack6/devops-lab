@@ -14,6 +14,12 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - monitor-net
     volumes:
@@ -100,7 +106,7 @@ services:
     container_name: prometheus
     restart: always
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /opt/homelab/config/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
@@ -115,7 +121,10 @@ services:
     networks:
       - monitor-net
     volumes:
-      - grafana_data:/var/lib/grafana
+      - /opt/homelab/config/grafana/datasources:/etc/grafana/provisioning/datasources
+      - /opt/homelab/config/grafana/dashboards/dashboard_provider.yaml:/etc/grafana/provisioning/dashboards/dashboard_provider.yaml
+      - /opt/homelab/config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - /opt/homelab/grafana/grafana_data:/var/lib/grafana
 
   loki:
     image: grafana/loki:3.0.0
@@ -132,7 +141,7 @@ services:
     user: "0:0"
     privileged: true
     volumes:
-      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /opt/homelab/config/promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
