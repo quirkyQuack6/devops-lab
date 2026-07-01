@@ -10,3 +10,11 @@ grafana_data/
 # Специфичные файлы для Linux/Архивов
 *.log
 .DS_Store
+
+# Terraform 
+*.tfstate
+*.backup
+*.iso
+*.terraform/
+*.xml
+*.hcl
