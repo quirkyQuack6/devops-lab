@@ -2,13 +2,13 @@ services:
   jenkins:
     build: .
     container_name: jenkins-ci
-    ports:
-      - "8084:8080"
-      - "50000:50000"
+    network_mode: host
+    environment:
+      - JENKINS_OPTS=--httpPort=8084
     volumes:
       - jenkins_data:/var/jenkins_home
       - /home/vova/.ssh:/var/jenkins_home/.ssh:ro
-    restart: always
+    restart: unless-stopped
 
 volumes:
   jenkins_data:
