@@ -8,7 +8,7 @@
 
 * **Хост-система**: Arch Linux + `libvirt` (QEMU/KVM) + `nftables`
 * **Виртуальная машина**: Ubuntu 24.04 LTS (Noble Numbat) Cloud Image
-* **Инфраструктурный слой (IaC)**: Terraform м1.15 + провайдер `dmacvicar/libvirt` (v0.9.8)
+* **Инфраструктурный слой (IaC)**: Terraform v1.15 + провайдер `dmacvicar/libvirt` (v0.9.8)
 * **Управление конфигурацией**: Ansible
 * **CI/CD Оркестратор**: Jenkins LTS (запущен в Docker, режим `network_mode: host`)
 * **Приложения и Мониторинг**: Docker Compose стек из 10 контейнеров:
