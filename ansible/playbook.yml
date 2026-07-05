@@ -131,10 +131,15 @@
         group: ubuntu
         mode: '0644'
 
-    - name: Copy Docker Compose environment file
+    - name: Generate Docker Compose environment file dynamically
       copy:
-        src: "../.env"
         dest: "/opt/homelab/.env"
+        content: |
+          MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
+          MYSQL_PASSWORD={{ mysql_password }}
+          MYSQL_USER={{ mysql_user }}
+          MYSQL_EXPORTER_USER={{ mysql_exporter_user }}
+          MYSQL_DATABASE={{ mysql_database }}
         owner: ubuntu
         group: ubuntu
         mode: '0755'
