@@ -10,7 +10,7 @@ def secrets = [
 
 def configuration = [
   vaultUrl: 'http://localhost:8200', 
-  engineVersion: 2'
+  engineVersion: 2
 ]
 
 pipeline {
