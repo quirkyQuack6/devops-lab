@@ -8,7 +8,7 @@ def secrets = [
     ]]
 ]
 def configuration = [
-  vaultUrl: 'http://localhost:8200, 
+  vaultUrl: 'http://localhost:8200', 
   engineVersion: 2'
 ]
 
