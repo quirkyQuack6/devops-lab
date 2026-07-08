@@ -7,6 +7,7 @@ def secrets = [
         [envVar: 'VAULT_MYSQL_DATABASE', vaultKey: 'mysql_database']
     ]]
 ]
+
 def configuration = [
   vaultUrl: 'http://localhost:8200', 
   engineVersion: 2'
