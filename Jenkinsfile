@@ -10,6 +10,7 @@ def secrets = [
 
 def configuration = [
   vaultUrl: 'http://localhost:8200', 
+  vaultCredentialId: '',
   engineVersion: 2
 ]
 
