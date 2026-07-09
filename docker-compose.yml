@@ -53,7 +53,7 @@ services:
     environment:
       - MYSQLD_EXPORTER_PASSWORD=${MYSQL_PASSWORD}
     command:
-      - "--mysqld.username=${MYSQL_EXPORTER_USER}"
+      - "--mysqld.username=${MYSQL_EXP_USER}"
       - "--mysqld.address=db:3306"
     networks:
       - monitor-net

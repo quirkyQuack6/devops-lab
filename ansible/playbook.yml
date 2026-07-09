@@ -138,7 +138,7 @@
           MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
           MYSQL_PASSWORD={{ mysql_password }}
           MYSQL_USER={{ mysql_user }}
-          MYSQL_EXPORTER_USER={{ mysql_exporter_user }}
+          MYSQL_EXP_USER={{ mysql_exp_user }}
           MYSQL_DATABASE={{ mysql_database }}
         owner: ubuntu
         group: ubuntu
@@ -184,7 +184,7 @@
     - name: Create exporter user
       command: >
         docker exec wp-db mysql -u root -p{{ mysql_root_password }} -e
-        "CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '{{ mysql_exporter_password }}';
+        "CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '{{ mysql_exp_password }}';
          GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
          FLUSH PRIVILEGES;"
       changed_when: true
