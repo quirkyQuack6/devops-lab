@@ -7,12 +7,12 @@
 ## Архитектура стека
 
 * **Хост-система**: Arch Linux + `libvirt` (QEMU/KVM) + `nftables`
-* **Виртуальная машина**: Ubuntu 24.04 LTS (Noble Numbat) Cloud Image
 * **Инфраструктурный слой (IaC)**: Terraform v1.15 + провайдер `dmacvicar/libvirt` (v0.9.8)
-* **Управление конфигурацией**: Ansible
 * **CI/CD Оркестратор**: Jenkins LTS (запущен в Docker, режим `network_mode: host`)
 * **Управление секретами**: HashiCorp Vault (запущен в Docker)
-* **Приложения и Мониторинг**: Docker Compose стек из 10 контейнеров:
+* **Управление конфигурацией**: Ansible
+* **Виртуальная машина**: Ubuntu 24.04 LTS (Noble Numbat) Cloud Image
+* **Приложения и Мониторинг**: Docker Compose стек из 10 контейнеров на ВМ:
   *   *Приложения*: WordPress, MySQL, Redis
   *   *Монитооринг (PLG)*: Prometheus, Grafana, Loki, Promtail, cAdvisor, Node Exporter, MySQL Exporter
 
@@ -61,16 +61,22 @@ terraform apply
 ```
 *Terraform требуется до 150 секунд, чтобы поднять домен подключить ISO-образ Cloud-Init как CD-ROM устройство и дождаться выделения IP-адреса по DHCP.*
 
-### Шаг 2: Запуск системы безопасности
-1. Запустите Vault: 
-   ```bash
-   cd ../vault && docker compose up -d
-   ```
-2. Авторизуйте CLI-сессию внутри контейнера Vault с помощью мастер-токена:
+### Шаг 2: Запуск сервера автоматизации (Jenkins)
+Соберите кастомный образ Jenkins со встроенным Ansible и запустите Jenkins и Vault:
+```bash
+cd ../jenkins
+docker compose up -d --build
+```
+1. Откройте интерфейс: `http://localhost:8084`.
+2. Заберите первичный пароль из логов хоста: `docker logs jenkins`.
+3. Создайте элемент типа **Pipeline**, укажите ссылку на ваш Github-репозиторий, ветку `*/main` и режим опроса `Poll SCM` со значением например `H/5 * * * *`.
+
+### Шаг 3: Настройка системы безопасности
+1. Авторизуйте CLI-сессию внутри контейнера Vault с помощью мастер-токена:
    ```bash
    docker exec -it vault-server vault login <ваш-токен>
    ```
-3. Запишите секреты бд и мониторинга в хранилище по пути `secret/homelab/db`:
+2. Запишите секреты бд и мониторинга в хранилище по пути `secret/homelab/db`:
    ```bash
    docker exec -it vault-server vault kv put secret/homelab/db \
      mysql_root_password="ваш_root_пароль" \
@@ -80,23 +86,13 @@ terraform apply
      mysql_exporter_password="ваш_пароль_для_exporter" \
      mysql_database="wordpress"
    ```
-4. Проверьте корректность записи данных в хранилище:
+3. Проверьте корректность записи данных в хранилище:
    ```bash
    docker exec -it vault-server vault kv get sescret/homelab/db
-   ```
-     
+   ```     
+4. Установите плагин `HashiCorp Vault Plugin` в Jenkins.
+5. В разделе *Manage Jenkins ➔ Credentials* добавьте секрет с типом **Vault Token Credential**. Укажите ID `vault-root-token` и вставьте <ваш_токен>.
 
-### Шаг 3: Запуск сервера автоматизации (Jenkins)
-Соберите кастомный образ Jenkins со встроенным Ansible внутри папки проекта:
-```bash
-cd ../jenkins
-docker compose up -d --build
-```
-1. Откройте интерфейс: `http://localhost:8084`.
-2. Заберите первичный пароль из логов хоста: `docker logs jenkins`.
-3. Установите плагин `HashiCorp Vault Plugin`.
-4. В разделе *Manage Jenkins ➔ Credentials* добавьте секрет с типом **Vault Token Credential**. Укажите ID `vault-root-token` и вставьте <ваш_токен>.
-5. Создайте элемент типа **Pipeline**, укажите ссылку на ваш Github-репозиторий, ветку `*/main` и режим опроса `Poll SCM` со значением например `H/5 * * * *`.
 
 ### Шаг 4. Автоматический запуск
 Убедитесь, что актуальный IP-адрес вашей ВМ прописан в `ansible/hosts.ini`, сделайте коммит изменений и влейте Pull Request. Через 5 минут Jenkins автоматически выполнит деплой всего стека.
