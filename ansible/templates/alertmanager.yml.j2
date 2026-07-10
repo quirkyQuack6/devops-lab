@@ -1,5 +1,7 @@
 global:
   resolve_timeout: 5m
+  http_config:
+    proxy_url: 'http://192.168.122.1:10808'
 
 route:
   group_by: ['alertname']
