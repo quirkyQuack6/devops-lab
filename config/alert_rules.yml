@@ -1,0 +1,11 @@
+groups:
+  - name: homelab_rules
+    rules:
+    - alert: ContainerDown
+      expr: up == 0
+      for: 30s
+      labels:
+        severity: critical
+      annotations:
+        summary: "Контейнер {{ $labels.instance }} упал"
+        description: "Сервис {{ $labels.job }} недоступен уже более 30 секунд"

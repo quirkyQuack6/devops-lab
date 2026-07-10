@@ -4,7 +4,9 @@ def secrets = [
         [envVar: 'VAULT_MYSQL_PASS', vaultKey: 'mysql_password'],
         [envVar: 'VAULT_MYSQL_USER', vaultKey: 'mysql_user'],
         [envVar: 'VAULT_MYSQL_EXP_USER', vaultKey: 'mysql_exp_user'],
-        [envVar: 'VAULT_MYSQL_DATABASE', vaultKey: 'mysql_database']
+        [envVar: 'VAULT_MYSQL_DATABASE', vaultKey: 'mysql_database'],
+        [envVar: 'VAULT_TG_TOKEN', vaultKey: 'telegram_bot_token'],
+        [envVar: 'VAULT_TG_CHAT', vaultKey: 'telegram_chat_id']
     ]]
 ]
 
@@ -35,7 +37,7 @@ pipeline {
             steps {
                 echo 'Connecting to Vault and deploying via Ansible...'
                 withVault([configuration: configuration, vaultSecrets: secrets]) {
-                    sh "ansible-playbook -i ansible/hosts.ini ansible/playbook.yml --extra-vars 'mysql_root_password=${env.VAULT_MYSQL_ROOT_PASS} mysql_password=${env.VAULT_MYSQL_PASS} mysql_user=${env.VAULT_MYSQL_USER} mysql_exp_user=${env.VAULT_MYSQL_EXP_USER} mysql_database=${env.VAULT_MYSQL_DATABASE}'"
+                    sh "ansible-playbook -i ansible/hosts.ini ansible/playbook.yml --extra-vars 'mysql_root_password=${env.VAULT_MYSQL_ROOT_PASS} mysql_password=${env.VAULT_MYSQL_PASS} mysql_user=${env.VAULT_MYSQL_USER} mysql_exp_user=${env.VAULT_MYSQL_EXP_USER} mysql_database=${env.VAULT_MYSQL_DATABASE} telegram_bot_token=${env.VAULT_TG_TOKEN} telegram_chat_id=${env.VAULT_TG_CHAT}'"
                 }
             }
         }
