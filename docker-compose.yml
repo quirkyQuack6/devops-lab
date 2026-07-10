@@ -121,6 +121,8 @@ services:
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
     restart: unless-stopped
+    networks:
+      - monitor-net
 
   grafana:
     image: grafana/grafana:latest
