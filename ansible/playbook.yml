@@ -154,6 +154,22 @@
         mode: '0755'
       ignore_errors: yes
 
+    - name: Copy Alertmanager config template
+      template:
+        src: "templates/alertmanager.yml.j2"
+        dest: "/opt/homelab/config/alertmanager.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy Prometheus alert rules config
+      copy:
+        src: "../config/alert_rules.yml"
+        dest: "/opt/homelab/config/alert_rules.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
     - name: Run up-to-date Docker Compose stack
       community.docker.docker_compose_v2:
         project_src: /opt/homelab
@@ -189,18 +205,3 @@
          FLUSH PRIVILEGES;"
       changed_when: true
 
-    - name: Copy Alertmanager config template
-      template:
-        src: "templates/alertmanager.yml.j2"
-        dest: "/opt/homelab/config/alertmanager.yml"
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
-
-    - name: Copy Prometheus alert rules config
-      copy:
-        src: "../config/alert_rules.yml"
-        dest: "/opt/homelab/config/alert_rules.yml"
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
