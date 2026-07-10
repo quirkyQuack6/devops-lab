@@ -108,6 +108,7 @@ services:
     restart: always
     volumes:
       - /opt/homelab/config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /opt/homelab/config/alert_rules.yml:/etc/prometheus/alert_rules.yml
     ports:
       - "9090:9090"
     networks:
