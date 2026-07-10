@@ -188,3 +188,19 @@
          GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
          FLUSH PRIVILEGES;"
       changed_when: true
+
+    - name: Copy Alertmanager config template
+      template:
+        src: "templates/alertmanager.yml.j2"
+        dest: "/opt/homelab/config/alertmanager.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy Prometheus alert rules config
+      copy:
+        src: "../config/alert_rules.yml"
+        dest: "/opt/homelab/config/alert_rules.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'

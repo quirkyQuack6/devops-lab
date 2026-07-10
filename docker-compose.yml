@@ -113,6 +113,15 @@ services:
     networks:
       - monitor-net
 
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - /opt/homelab/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    restart: unless-stopped
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana

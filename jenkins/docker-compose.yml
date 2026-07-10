@@ -10,5 +10,16 @@ services:
       - /home/vova/.ssh:/var/jenkins_home/.ssh:ro
     restart: unless-stopped
 
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault-server
+    network_mode: host
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=quack-token
+      - VAULT_LISTEN_ADDRESS=0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    restart: unless-stopped
+
 volumes:
   jenkins_data:
