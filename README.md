@@ -1,4 +1,4 @@
-# HomeLab DevOps Node: IaC, Automated Monitoring & Jenkins CI/CD Pipeline
+# HomeLab DevOps Node: IaC, Automated Monitoring & Alerting & Jenkins CI/CD Pipeline
 
 Учебный проект (лабораторная работа) по автоматизации развертывания изолированной DevOps-инфраструктуры в KVM на базе Arch Linux. Проект реализует концепции **Infrastructure as Code (IaC)**, **Configuration as Code (CaC)** и **Dashboard as Code** с построением сквозного локального конвейера непрерывной интеграции и доставки (CI/CD).
 
@@ -15,12 +15,13 @@
 * **Приложения и Мониторинг**: Docker Compose стек из 10 контейнеров на ВМ:
   *   *Приложения*: WordPress, MySQL, Redis
   *   *Монитооринг (PLG)*: Prometheus, Grafana, Loki, Promtail, cAdvisor, Node Exporter, MySQL Exporter
+  *   *Алертинг*: Alertmanager, Telegram Bot
 
 ---
 
 ## Сетевая топология и обход блокировок
 
-Для успешного скачивания Docker-образов и скриптов в условиях ограничений Docker Hub для СНГ настроена гибридная прокси-маршрутизация:
+Для успешного скачивания Docker-образов и скриптов, а также для отправки уведомлений в Telegram, в условиях ограничений Docker Hub для СНГ настроена гибридная прокси-маршрутизация:
 1. **Прокси на хосте**: Приложение `v2rayN` / `Xray` слушает порт `10808` на интерфейсе `192.168.122.1` (KVM-мост хоста) с включенной опцией *Allow LAN*.
 2. **Файрвол хоста (`nftables`)**: В цепочку `chain input` добавлено правило `tcp dport 10808 accept` для беспрепятственного прохождения трафика из подсети виртуалки.
 3. **Зеркала**: Демон Docker внутри Ubuntu настроен на работу через зеркала, что гарантирует скачивание слоев образов.
@@ -84,7 +85,9 @@ docker compose up -d --build
      mysql_password="ваш_пароль_для_user" \
      mysql_exporter_user="exporter" \
      mysql_exporter_password="ваш_пароль_для_exporter" \
-     mysql_database="wordpress"
+     mysql_database="wordpress" \
+     telegram_bot_token="ваш_токен" \
+     telegram_chat_id="ваш_чат_id"
    ```
 3. Проверьте корректность записи данных в хранилище:
    ```bash
