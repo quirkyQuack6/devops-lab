@@ -182,6 +182,11 @@
         group: ubuntu
         mode: '0644'
 
+    - name: Restart Docker to restore iptables chains
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
     - name: Run up-to-date Docker Compose stack
       community.docker.docker_compose_v2:
         project_src: /opt/homelab
