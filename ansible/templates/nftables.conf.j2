@@ -1,0 +1,33 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # 1. Разрешаем loopback (localhost)
+        iif "lo" accept
+
+        # 2. Разрешаем уже установленные соединения (чтобы работал исходящий интернет)
+        ct state established,related accept
+
+        # 3. Разрешаем SSH для управления через Ansible
+        tcp dport 22 accept comment "Ansible SSH access"
+
+        # 4. Разрешаем WordPress (порт, который проброшен наружу из Docker)
+        tcp dport 8000 accept comment "WordPress Web Traffic"
+
+        # 5. Разрешаем сбор метрик для Prometheus (Node Exporter, MySQL Exporter, cAdvisor)
+        ip saddr 192.168.122.1 tcp dport { 9100, 9104, 8080, 9090 } accept comment "Prometheus Scrape Targets"
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+        # Оставляем accept, так как Docker внутри ВМ сам управляет форвардингом для своих сетей
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}

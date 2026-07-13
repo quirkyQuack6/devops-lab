@@ -16,3 +16,12 @@ receivers:
     - bot_token: '{{ telegram_bot_token }}'
       chat_id: {{ telegram_chat_id }}
       send_resolved: true
+      parse_mode: 'HTML'
+      message: |
+        {{ range .Alerts }}
+        <b>[ALERT] {{ .Status | toUpper }}</b>
+        <b>Инцидент:</b> {{ .Labels.alertname }}
+        <b>Уровень:</b> <code>{{ .Labels.severity }}</code>
+        <b>Описание:</b> {{ .Annotations.description }}
+        <b>Время:</b> {{ .StartsAt.Format "15:04:05" }}
+        {{ end }}

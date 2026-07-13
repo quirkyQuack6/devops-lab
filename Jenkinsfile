@@ -41,6 +41,18 @@ pipeline {
                 }
             }
         }
+
+        stage('Security Scan: WPScan') {
+            steps {
+                echo 'Starting WPScan....'
+                sh 'docker run --rm wpscanteam/wpscan --url http://localhost:8000 --enumerate vp,vt,u --format json -o wpscan-report.json'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'wpscan-report.json', fingerprint: true
+                }
+            }
+        }
     }
 
     post {

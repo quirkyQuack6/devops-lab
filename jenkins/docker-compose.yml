@@ -3,11 +3,13 @@ services:
     build: .
     container_name: jenkins-ci
     network_mode: host
+    user: root
     environment:
       - JENKINS_OPTS=--httpPort=8084
     volumes:
       - jenkins_data:/var/jenkins_home
       - /home/vova/.ssh:/var/jenkins_home/.ssh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
   vault:
