@@ -3,7 +3,6 @@ version: '3.8'
 networks:
   wp-internal-net:
     driver: bridge
-    internal: true
   monitor-net:
     driver: bridge
 
