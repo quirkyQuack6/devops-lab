@@ -18,6 +18,7 @@ receivers:
       send_resolved: true
       parse_mode: 'HTML'
       message: |
+        {% raw %}
         {{ range .Alerts }}
         <b>[ALERT] {{ .Status | toUpper }}</b>
         <b>Инцидент:</b> {{ .Labels.alertname }}
@@ -25,3 +26,4 @@ receivers:
         <b>Описание:</b> {{ .Annotations.description }}
         <b>Время:</b> {{ .StartsAt.Format "15:04:05" }}
         {{ end }}
+        {% endraw %}
