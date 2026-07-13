@@ -1,6 +1,9 @@
 version: '3.8'
 
 networks:
+  wp-internal-net:
+    driver: bridge
+    internal: true
   monitor-net:
     driver: bridge
 
@@ -21,7 +24,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - monitor-net
+      - wp-internal-net
     volumes:
       - db_data:/var/lib/mysql
 
@@ -42,7 +45,7 @@ services:
       - WORDPRESS_DEBUG=1
       - WORDPRESS_DEBUG_DISPLAY=1
     networks:
-      - monitor-net
+      - wp-internal-net
     volumes:
       - wp_data:/var/www/html
 
@@ -56,6 +59,7 @@ services:
       - "--mysqld.username=${MYSQL_EXP_USER}"
       - "--mysqld.address=db:3306"
     networks:
+      - wp-internal-net
       - monitor-net
     depends_on:
       - db
@@ -97,9 +101,8 @@ services:
     image: redis:latest
     container_name: redis
     restart: always
-    ports:
-      - "6379:6379"
     networks:
+      - wp-internal-net
       - monitor-net
 
   prometheus:

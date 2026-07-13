@@ -92,6 +92,18 @@
         groups: docker
         append: yes
 
+    - name: Install and configure nftables
+      block:
+        - apt:
+            name: nftables
+            state: present
+        - template:
+            src: "templates/nftables.conf.j2"
+            dest: /etc/nftables.conf
+            mode: '0644'
+          notify: Restart nftables
+        - meta: flush_handlers
+
     - name: Create directories for homelab services configuration
       file:
         path: "{{ item }}"
@@ -205,3 +217,9 @@
          FLUSH PRIVILEGES;"
       changed_when: true
 
+  handlers:
+    - name: Restart nftables
+      systemd:
+        name: nftables
+        state: restarted
+        enabled: true
