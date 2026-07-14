@@ -48,7 +48,7 @@ pipeline {
                 sh '''
                     docker run --rm \
                     --network host \
-                    -v "$WORKSPACE:/work" \
+                    -v "/opt/jenkins/workspace/$(JOB_NAME):/work" \
                     -w /work \
                     wpscanteam/wpscan \
                     --url http://192.168.122.204:8000 \
