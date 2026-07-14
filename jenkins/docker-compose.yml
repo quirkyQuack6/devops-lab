@@ -6,7 +6,7 @@ services:
     environment:
       - JENKINS_OPTS=--httpPort=8084
     volumes:
-      - jenkins_data:/var/jenkins_home
+      - /opt/jenkins:/var/jenkins_home
       - /home/vova/.ssh:/var/jenkins_home/.ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock
     group_add:
@@ -26,5 +26,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  jenkins_data:
   vault_storage:
