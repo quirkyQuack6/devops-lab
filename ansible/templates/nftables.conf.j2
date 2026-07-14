@@ -15,6 +15,9 @@ table inet filter {
         # 3. Разрешаем SSH для управления через Ansible
         tcp dport 22 accept comment "Ansible SSH access"
 
+        # Docker host subnet
+        ip saddr 172.17.0.0/16 accept comment "Docker host subnet"
+
         # 4. Разрешаем WordPress (порт, который проброшен наружу из Docker)
         tcp dport 8000 accept comment "WordPress Web Traffic"
 
