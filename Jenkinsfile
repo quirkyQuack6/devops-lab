@@ -45,7 +45,7 @@ pipeline {
         stage('Security Scan: WPScan') {
             steps {
                 echo 'Starting WPScan....'
-                sh 'docker run --rm wpscanteam/wpscan --url http://localhost:8000 --enumerate vp,vt,u --format json -o wpscan-report.json'
+                sh 'docker run --rm wpscanteam/wpscan --url http://192.168.122.204:8000 --enumerate vp,vt,u --format json -o wpscan-report.json'
             }
             post {
                 always {

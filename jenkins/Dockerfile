@@ -26,6 +26,9 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
     apt-get update && apt-get install -y docker-ce-cli && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN groupadd -g 960 docker-host || true && \
+    usermod -aG docker-host jenkins
+
 RUN pip3 install --no-cache-dir --break-system-packages ansible
 
 USER jenkins
