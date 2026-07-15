@@ -46,15 +46,27 @@ pipeline {
             steps {
                 echo 'Starting WPScan....'
                 sh '''
+                    set -x
+
+                    id
+                    pwd
+
+                    ls -ld /opt/jenkins/workspace
+                    ls -ld /opt/jenkins/workspace/$JOB_NAME
+
                     docker run --rm \
                     --network host \
-                    -v "/opt/jenkins/workspace/${JOB_NAME}:/work" \
+                    -v "/opt/jenkins/workspace/$JOB_NAME:/work" \
                     -w /work \
+                    --entrypoint sh \
                     wpscanteam/wpscan \
-                    --url http://192.168.122.204:8000 \
-                    --enumerate vp,vt,u \
-                    --format json \
-                    -o wpscan-report.json
+                    -c "
+                      id
+                      pwd
+                      ls -la
+                      touch test.txt
+                      ls -l test.txt
+                     "
                    '''
             }
             post {
