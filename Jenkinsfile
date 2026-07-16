@@ -45,29 +45,35 @@ pipeline {
         stage('Security Scan: WPScan') {
             steps {
                 echo 'Starting WPScan....'
-                sh '''
-                    set -x
+                script {
+                    def hostWorkspace = env.WORKSPACE.replace(
+                        "/var/jenkins_home",
+                        "/opt/jenkins"
+                    )
+                    sh '''
+                        set -x
 
-                    id
-                    pwd
+                        id
+                        pwd
 
-                    ls -ld /opt/jenkins/workspace
-                    ls -ld /opt/jenkins/workspace/$JOB_NAME
+                        ls -ld /opt/jenkins/workspace/
+                        ls -ld ${hostWorkspace}
 
-                    docker run --rm \
-                    --network host \
-                    -v "/opt/jenkins/workspace/$JOB_NAME:/work" \
-                    -w /work \
-                    --entrypoint sh \
-                    wpscanteam/wpscan \
-                    -c "
-                      id
-                      pwd
-                      ls -la
-                      touch test.txt
-                      ls -l test.txt
-                     "
-                   '''
+                        docker run --rm \
+                        --network host \
+                        -v "${hostWorkspace}:/work" \
+                        -w /work \
+                        --entrypoint sh \
+                        wpscanteam/wpscan \
+                         -c "
+                            id
+                            pwd
+                            ls -la
+                            touch test.txt
+                            ls -l test.txt
+                          "
+                       '''
+                } 
             }
             post {
                 always {
