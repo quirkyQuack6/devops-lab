@@ -42,53 +42,40 @@ pipeline {
             }
         }
 
-        stage('Security Scan: WPScan') {
+        stage('Start Test Environment') {
             steps {
-                echo 'Starting WPScan....'
-                script {
-                    def hostWorkspace = env.WORKSPACE.replace(
-                        "/var/jenkins_home",
-                        "/opt/jenkins"
-                    )
-                    sh '''
-                        set -x
-
-                        id
-                        pwd
-
-                        ls -ld /opt/jenkins/workspace/
-                        ls -ld ${hostWorkspace}
-
-                        docker run --rm \
-                        --network host \
-                        -v "${hostWorkspace}:/work" \
-                        -w /work \
-                        --entrypoint sh \
-                        wpscanteam/wpscan \
-                         -c "
-                            id
-                            pwd
-                            ls -la
-                            touch test.txt
-                            ls -l test.txt
-                          "
-                       '''
-                } 
+                 sh "docker compose -f ci/docker-compose.test.yml up -d"
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'wpscan-report.json', fingerprint: true
-                }
+        }
+        
+        stage('Initialize WordPress') {
+            steps {
+                 sh './ci/install-wordpress.sh'
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                 sh './ci/run-wpscan.sh'
             }
         }
     }
 
     post {
+
+        always {
+            archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+        }
+
         success {
             echo 'CI/CD Pipeline completed successfully! Infrastructure is up-to-date.'
         }
+
         failure {
             echo 'Pipeline failed. Please check the logs above.'
         }
+
+        cleanup {
+            sh "docker compose -f ci/docker-compose.test.yml down -v"
     }
 }
