@@ -26,6 +26,13 @@ if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		exit 1
 fi
 
+docker compose \
+  -f test/docker-compose.test.yml \
+  run --rm \
+  --entrypoint sh \
+  wpscan \
+  -c 'id && mount | grep reports && ls -ld /reports'
+
 docker compose -f test/docker-compose.test.yml run --rm \
 		wpscan \
 		--no-update \
