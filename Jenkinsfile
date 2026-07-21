@@ -19,6 +19,12 @@ def configuration = [
   engineVersion: 2
 ]
 
+def withVaultSecrets(Closure body) {
+    withVault([configuration: configuration, vaultSecrets: secrets]) {
+        body()
+    }
+}
+
 pipeline {
     agent any
 
@@ -35,19 +41,25 @@ pipeline {
                 sh "./scripts/syntaxcheck.sh"
             }
         }
-
+   
         stage('Deploy Infrastructure Stack') {
             steps {
                 echo 'Connecting to Vault and deploying via Ansible...'
-                withVault([configuration: configuration, vaultSecrets: secrets]) {
-                    sh "./scripts/deploy.sh"
+                script {
+                    withVaultSecrets {
+                        sh "./scripts/deploy.sh"
+                    }
                 }
             }
         }
 
         stage('Start Test Environment') {
             steps {
-                sh "./scripts/test/start-test-env.sh"
+                script {
+                    withVaultSecrets {
+                        sh "./scripts/test/start-test-env.sh"
+                    }
+                }
             }
         }
         
@@ -59,7 +71,11 @@ pipeline {
 
         stage('Security Scan') {
             steps {
-                sh './scripts/test/run-wpscan.sh'
+                script {
+                    withVaultSecrets {
+                        sh './scripts/test/run-wpscan.sh'
+                    }
+                }
             }
         }
     }
