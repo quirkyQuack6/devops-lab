@@ -7,6 +7,9 @@ def secrets = [
         [envVar: 'VAULT_MYSQL_DATABASE', vaultKey: 'mysql_database'],
         [envVar: 'VAULT_TG_TOKEN', vaultKey: 'telegram_bot_token'],
         [envVar: 'VAULT_TG_CHAT', vaultKey: 'telegram_chat_id']
+    ]],
+    [path: 'secret/homelab/ci', engineVersion: 2, secretValues: [
+        [envVar: 'VAULT_WPSCAN_API_TOKEN', vaultKey: 'WPSCAN_API_TOKEN']
     ]]
 ]
 
@@ -29,7 +32,7 @@ pipeline {
         stage('Lint & Validate') {
             steps {
                 echo 'Checking Ansible Playbook syntax...'
-                sh 'ansible-playbook -i ansible/hosts.ini ansible/playbook.yml --syntax-check'
+                sh "./scripts/syntaxcheck.sh"
             }
         }
 
@@ -37,26 +40,26 @@ pipeline {
             steps {
                 echo 'Connecting to Vault and deploying via Ansible...'
                 withVault([configuration: configuration, vaultSecrets: secrets]) {
-                    sh "ansible-playbook -i ansible/hosts.ini ansible/playbook.yml --extra-vars 'mysql_root_password=${env.VAULT_MYSQL_ROOT_PASS} mysql_password=${env.VAULT_MYSQL_PASS} mysql_user=${env.VAULT_MYSQL_USER} mysql_exp_user=${env.VAULT_MYSQL_EXP_USER} mysql_database=${env.VAULT_MYSQL_DATABASE} telegram_bot_token=${env.VAULT_TG_TOKEN} telegram_chat_id=${env.VAULT_TG_CHAT}'"
+                    sh "./scripts/deploy.sh"
                 }
             }
         }
 
         stage('Start Test Environment') {
             steps {
-                 sh "docker compose -f ci/docker-compose.test.yml up -d"
+                sh "./scripts/test/start-test-env.sh"
             }
         }
         
         stage('Initialize WordPress') {
             steps {
-                 sh './ci/install-wordpress.sh'
+                sh './scripts/test/install-wordpress.sh'
             }
         }
 
         stage('Security Scan') {
             steps {
-                 sh './ci/run-wpscan.sh'
+                sh './scripts/test/run-wpscan.sh'
             }
         }
     }
@@ -64,7 +67,10 @@ pipeline {
     post {
 
         always {
-            archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+            archiveArtifacts( 
+                artifacts: 'test/reports/*.json', 
+                allowEmptyArchive: true
+            )
         }
 
         success {
@@ -76,6 +82,7 @@ pipeline {
         }
 
         cleanup {
-            sh "docker compose -f ci/docker-compose.test.yml down -v"
+            sh "./scripts/test/cleanup.sh"
+        }
     }
 }
