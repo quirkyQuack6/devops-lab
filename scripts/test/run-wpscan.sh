@@ -15,14 +15,6 @@ if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		exit 1
 fi
 
-docker compose \
-    --profile tools \
-    -f test/docker-compose.test.yml \
-    run --rm \
-    --entrypoint sh \
-    wpscan \
-    -c 'id && ls -ld /reports && touch /reports/test.txt && ls -l /reports'
-
 echo "Starting WPScan container..."
 
 docker compose --profile tools -f test/docker-compose.test.yml run --rm \
