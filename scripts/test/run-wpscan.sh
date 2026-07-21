@@ -21,7 +21,7 @@ docker compose \
     run --rm \
     --entrypoint sh \
     wpscan \
-    -c 'curl -I http://wordpress'
+		-c 'ruby -e "require \"net/http\"; puts Net::HTTP.get_response(URI(\"http://wordpress\")).code"'
 
 echo "Starting WPScan container..."
 
