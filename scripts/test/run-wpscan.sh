@@ -29,11 +29,11 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm \
 
 WPSCAN_EXIT_CODE=$?
 
-echo"WPScan exit code: $WPSCAN_EXIT_CODE"
+echo "WPScan exit code: $WPSCAN_EXIT_CODE"
 
 set -e
 
-if ["$WPSCAN_EXIT_CODE" -ne 0 ]; then
+if [ "$WPSCAN_EXIT_CODE" -ne 0 ]; then
 		exit "$WPSCAN_EXIT_CODE"
 fi
 
