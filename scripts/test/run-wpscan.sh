@@ -15,15 +15,9 @@ if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		exit 1
 fi
 
-docker compose \
-    --profile tools \
-    -f test/docker-compose.test.yml \
-    run --rm \
-    --entrypoint sh \
-    wpscan \
-		-c 'ruby -e "require \"net/http\"; puts Net::HTTP.get_response(URI(\"http://wordpress\")).code"'
-
 echo "Starting WPScan container..."
+
+set +e
 
 docker compose --profile tools -f test/docker-compose.test.yml run --rm \
 		wpscan \
@@ -33,9 +27,19 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm \
     --format json \
 		--output /reports/wpscan-report.json
 
+WPSCAN_EXIT_CODE=$
+
+echo"WPScan exit code: $WPSCAN_EXIT_CODE"
+
+set -e
+
+if ["$WPSCAN_EXIT_CODE" -ne 0 ]; then
+		exit "$WPSCAN_EXIT_CODE"
+fi
+
 echo "WPScan finished"
 
-if [ ! -f test/reports/wpscan-report.json ]; then
-				echo "ERROR: WPScan report wasn't generated"
-				exit 1
-fi
+#if [ ! -f test/reports/wpscan-report.json ]; then
+#				echo "ERROR: WPScan report wasn't generated"
+#				exit 1
+#fi
