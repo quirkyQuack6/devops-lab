@@ -27,7 +27,7 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm \
     --format json \
 		--output /reports/wpscan-report.json
 
-WPSCAN_EXIT_CODE=$
+WPSCAN_EXIT_CODE=$?
 
 echo"WPScan exit code: $WPSCAN_EXIT_CODE"
 
