@@ -7,10 +7,10 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=${VAULT_MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${VAULT_MYSQL_ROOT_PASS}
       - MYSQL_DATABASE=${VAULT_MYSQL_DATABASE}
       - MYSQL_USER=${VAULT_MYSQL_USER}
-      - MYSQL_PASSWORD=${VAULT_MYSQL_PASSWORD}
+      - MYSQL_PASSWORD=${VAULT_MYSQL_PASS}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
@@ -33,7 +33,7 @@ services:
     environment:
       - WORDPRESS_DB_HOST=db:3306
       - WORDPRESS_DB_USER=${VAULT_MYSQL_USER}
-      - WORDPRESS_DB_PASSWORD=${VAULT_MYSQL_PASSWORD}
+      - WORDPRESS_DB_PASSWORD=${VAULT_MYSQL_PASS}
       - WORDPRESS_DB_NAME=${VAULT_MYSQL_DATABASE}
       - WORDPRESS_DEBUG=1
       - WORDPRESS_DEBUG_DISPLAY=1
@@ -58,7 +58,7 @@ services:
     environment:
       - WORDPRESS_DB_HOST=db:3306
       - WORDPRESS_DB_USER=${VAULT_MYSQL_USER}
-      - WORDPRESS_DB_PASSWORD=${VAULT_MYSQL_PASSWORD}
+      - WORDPRESS_DB_PASSWORD=${VAULT_MYSQL_PASS}
       - WORDPRESS_DB_NAME=${VAULT_MYSQL_DATABASE}
     networks:
       - wp-test-net

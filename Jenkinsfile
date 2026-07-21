@@ -19,12 +19,6 @@ def configuration = [
   engineVersion: 2
 ]
 
-def withVaultSecrets(Closure body) {
-    withVault([configuration: configuration, vaultSecrets: secrets]) {
-        body()
-    }
-}
-
 pipeline {
     agent any
 
@@ -46,7 +40,7 @@ pipeline {
             steps {
                 echo 'Connecting to Vault and deploying via Ansible...'
                 script {
-                    withVaultSecrets {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
                         sh "./scripts/deploy.sh"
                     }
                 }
@@ -56,7 +50,7 @@ pipeline {
         stage('Start Test Environment') {
             steps {
                 script {
-                    withVaultSecrets {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
                         sh "./scripts/test/start-test-env.sh"
                     }
                 }
@@ -72,7 +66,7 @@ pipeline {
         stage('Security Scan') {
             steps {
                 script {
-                    withVaultSecrets {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
                         sh './scripts/test/run-wpscan.sh'
                     }
                 }
