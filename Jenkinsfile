@@ -59,7 +59,11 @@ pipeline {
         
         stage('Initialize WordPress') {
             steps {
-                sh './scripts/test/install-wordpress.sh'
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh './scripts/test/install-wordpress.sh'
+                    }
+                }
             }
         }
 
