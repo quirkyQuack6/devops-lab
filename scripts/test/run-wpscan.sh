@@ -26,13 +26,6 @@ docker compose \
 	-f test/docker-compose.test.yml \
 	run --rm wpscan-init
 
-docker compose \
-  --profile tools \
-  -f test/docker-compose.test.yml \
-  run --rm \
-  wpscan \
-  sh -c "id && getent hosts wordpress"
-
 echo "Starting WPScan container..."
 
 set +e
@@ -42,6 +35,7 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm\
 		--update \
 		--url http://wordpress \
 		--enumerate vp,vt,u \
+		--verbose \
     --format json \
 		--output /reports/wpscan-report.json
 
