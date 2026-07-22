@@ -21,6 +21,11 @@ ls -ld test
 ls -ld test/reports
 stat test/reports
 
+docker compose \
+	--profile tools \
+	-f test/docker-compose.test.yml \
+	run --rm wpscan-init
+
 echo "Starting WPScan container..."
 
 set +e
