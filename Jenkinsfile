@@ -71,7 +71,16 @@ pipeline {
             steps {
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh './scripts/test/run-wpscan.sh'
+                        sh '''
+                            docker compose \
+                              --profile tools \
+                              -f test/docker-compose.test.yml \
+                              run --rm \
+                              wpscan \
+                              --no-update \
+                              --url http://wordpress \
+                              --enumerate vp,vt,u
+                        '''
                     }
                 }
             }
