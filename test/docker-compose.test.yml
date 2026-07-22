@@ -74,8 +74,9 @@ services:
     environment:
       - WPSCAN_API_TOKEN=${VAULT_WPSCAN_API_TOKEN}
     volumes:
-      - ./reports:/reports
+      - wpscan_reports:/reports
 
 volumes:
   db_data:
   wp_data:
+  wpscan_reports:
