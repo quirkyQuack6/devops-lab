@@ -21,7 +21,7 @@ set +e
 
 docker compose --profile tools -f test/docker-compose.test.yml run --rm \
 		wpscan \
-		--no-update \
+		--update \
 		--url http://wordpress \
 		--enumerate vp,vt,u \
     --format json \

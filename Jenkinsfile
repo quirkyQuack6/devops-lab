@@ -61,7 +61,7 @@ pipeline {
             steps {
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh './scripts/test/install-wordpress.sh'
+                        sh "./scripts/test/install-wordpress.sh"
                     }
                 }
             }
@@ -71,16 +71,7 @@ pipeline {
             steps {
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh '''
-                            docker compose \
-                              --profile tools \
-                              -f test/docker-compose.test.yml \
-                              run --rm \
-                              wpscan \
-                              --no-update \
-                              --url http://wordpress \
-                              --enumerate vp,vt,u
-                        '''
+                        sh "./scripts/test/run-wpscan.sh"
                     }
                 }
             }
