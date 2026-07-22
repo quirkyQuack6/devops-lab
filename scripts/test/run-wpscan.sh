@@ -21,7 +21,9 @@ docker compose \
   run --rm \
   --entrypoint sh \
   wpscan \
-  -c 'echo $HOME && ls -la $HOME && find / -name "plugins.json" 2>/dev/null'
+  -c '
+      ls -R /wpscan/.cache
+     '
 
 echo "Starting WPScan container..."
 
