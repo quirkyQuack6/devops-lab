@@ -15,12 +15,6 @@ if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		exit 1
 fi
 
-echo "Host:"
-pwd
-ls -ld test
-ls -ld test/reports
-stat test/reports
-
 docker compose \
 	--profile tools \
 	-f test/docker-compose.test.yml \
@@ -28,7 +22,7 @@ docker compose \
 
 echo "Starting WPScan container..."
 
-set +e
+#set +e
 docker compose --profile tools -f test/docker-compose.test.yml run --rm -T wpscan --update
 
 docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
@@ -40,15 +34,15 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
     --format json \
 		--output /reports/wpscan-report.json
 
-WPSCAN_EXIT_CODE=$?
+#WPSCAN_EXIT_CODE=$?
 
-echo "WPScan exit code: $WPSCAN_EXIT_CODE"
+#echo "WPScan exit code: $WPSCAN_EXIT_CODE"
 
-set -e
+#set -e
 
-if [ "$WPSCAN_EXIT_CODE" -ne 0 ]; then
-		exit "$WPSCAN_EXIT_CODE"
-fi
+#if [ "$WPSCAN_EXIT_CODE" -ne 0 ]; then
+#		exit "$WPSCAN_EXIT_CODE"
+#fi
 
 echo "WPScan finished"
 
