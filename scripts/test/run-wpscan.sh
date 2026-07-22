@@ -22,7 +22,11 @@ docker compose \
   --entrypoint sh \
   wpscan \
   -c '
-      ls -R /wpscan/.cache
+      id
+      pwd
+      ls -ld /reports
+      touch /reports/test.txt
+      echo $?
      '
 
 echo "Starting WPScan container..."
