@@ -67,7 +67,6 @@ services:
 
   wpscan:
     image: wpscanteam/wpscan
-    user: root
     profiles:
       - tools
     networks:
