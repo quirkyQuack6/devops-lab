@@ -25,7 +25,7 @@ echo "Starting WPScan container..."
 
 set +e
 
-docker compose --profile tools -f test/docker-compose.test.yml run --rm \
+docker compose --profile tools -f test/docker-compose.test.yml run \
 		wpscan \
 		--update \
 		--url http://wordpress \
