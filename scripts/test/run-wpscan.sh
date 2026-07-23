@@ -23,7 +23,7 @@ docker compose \
 echo "Starting WPScan container..."
 
 #set +e
-docker compose --profile tools -f test/docker-compose.test.yml run --rm -T wpscan --update
+#docker compose --profile tools -f test/docker-compose.test.yml run --rm -T wpscan --update
 
 docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
 		wpscan \
