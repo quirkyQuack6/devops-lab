@@ -74,6 +74,10 @@ pipeline {
                         sh "./scripts/test/run-wpscan.sh"
                     }
                 }
+                sh '''
+                   echo "Reports:"
+                   ls -lah test/reports
+                   '''
             }
         }
     }
