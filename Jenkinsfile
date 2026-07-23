@@ -77,15 +77,7 @@ pipeline {
                 sh '''
                    echo "Copy report started"
 
-                   docker run --rm \
-
-                     -v test_wpscan_reports:/data \
-
-                     -v "$PWD/test/reports:/out" \
-
-                     alpine \
-
-                     cp /data/wpscan-report.json /out/
+                   docker run --rm -v test_wpscan_reports:/data -v "/var/jenkins_home/workspace/${JOB_NAME}/test/reports:/out" alpine cp /data/wpscan-report.json /out/wpscan_report.json
 
                    echo "Copy finished"
                    '''
