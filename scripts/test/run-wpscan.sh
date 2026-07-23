@@ -34,11 +34,18 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
     --format json \
 		--output /reports/wpscan-report.json
 
+echo "WPScan finished"
+
+echo "Copy report started"
+
 docker run --rm \
 	-v test_wpscan_reports:/data \
 	-v "$PWD/test/reports:/out" \
 	alpine \
-	cp /data/wpscan-report.json /out/
+	cp /data/wpscan-report.json /out/ \
+	ls -ld /out
+
+echo "Copy finished"
 
 #WPSCAN_EXIT_CODE=$?
 
@@ -49,8 +56,6 @@ docker run --rm \
 #if [ "$WPSCAN_EXIT_CODE" -ne 0 ]; then
 #		exit "$WPSCAN_EXIT_CODE"
 #fi
-
-echo "WPScan finished"
 
 #if [ ! -f test/reports/wpscan-report.json ]; then
 #				echo "ERROR: WPScan report wasn't generated"
