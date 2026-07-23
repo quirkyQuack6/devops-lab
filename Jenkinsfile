@@ -75,11 +75,12 @@ pipeline {
                     }
                 }
                 sh '''
-                   echo "Copy report started"
+                   docker create --name wpscan-copy \
+                     -v test_wpscan_reports:/data \
+                     alpine
 
-                   docker run --rm -v test_wpscan_reports:/data -v "/var/jenkins_home/workspace/${JOB_NAME}/test/reports:/out" alpine cp /data/wpscan-report.json /out/wpscan_report.json
-
-                   echo "Copy finished"
+                   docker cp wpscan-copy:/data/wpscan_report.json test/reports/wpscan_report.json
+                   docker rm wpscan-copy
                    '''
                 sh '''
                    echo "Reports:"

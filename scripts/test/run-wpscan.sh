@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 mkdir -p "$REPO_ROOT/test/reports"
-chown 1000:1000 "$REPO_ROOT/test/reports"
+#chown 1000:1000 "$REPO_ROOT/test/reports"
 
 if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		echo "ERROR: VAULT_WPSCAN_API_TOKEN is not set"
