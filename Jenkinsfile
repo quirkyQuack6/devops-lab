@@ -74,16 +74,8 @@ pipeline {
                         sh "./scripts/test/run-wpscan.sh"
                     }
                 }
-                sh '''
-                   CID=$(docker create -v test_wpscan_reports:/data alpine)
-
-                   docker cp "$CID":/data/wpscan-report.json test/reports/wpscan-report.json
-                   docker rm "$CID"
-                   '''
-                sh '''
-                   echo "Reports:"
-                   ls -lah test/reports
-                   '''
+                sh "./scripts/test/copy-wpscan-report.sh"
+                sh "./scripts/test/check-report.sh"
             }
         }
     }
