@@ -34,6 +34,12 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
     --format json \
 		--output /reports/wpscan-report.json
 
+docker run --rm \
+	-v test_wpscan_reports:/data \
+	-v "$PWD/test/reports:/out" \
+	alpine \
+	cp /data/wpscan-report.json /out/
+
 #WPSCAN_EXIT_CODE=$?
 
 #echo "WPScan exit code: $WPSCAN_EXIT_CODE"
