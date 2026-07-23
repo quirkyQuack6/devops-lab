@@ -9,6 +9,7 @@ cd "$REPO_ROOT"
 
 ansible-playbook \
 		-i ansible/hosts.ini \
+		--private-key "$ANSIBLE_PRIVATE_KEY_FILE" \
 		ansible/playbook.yml \
 		--extra-vars "
         mysql_root_password=$VAULT_MYSQL_ROOT_PASS
