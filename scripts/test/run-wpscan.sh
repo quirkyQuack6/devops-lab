@@ -8,7 +8,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 mkdir -p "$REPO_ROOT/test/reports"
-#chown 1000:1000 "$REPO_ROOT/test/reports"
 
 if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		echo "ERROR: VAULT_WPSCAN_API_TOKEN is not set"
@@ -22,9 +21,6 @@ docker compose \
 
 echo "Starting WPScan container..."
 
-#set +e
-#docker compose --profile tools -f test/docker-compose.test.yml run --rm -T wpscan --update
-
 docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
 		wpscan \
 		--no-update \
@@ -36,17 +32,3 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
 
 echo "WPScan finished"
 
-#WPSCAN_EXIT_CODE=$?
-
-#echo "WPScan exit code: $WPSCAN_EXIT_CODE"
-
-#set -e
-
-#if [ "$WPSCAN_EXIT_CODE" -ne 0 ]; then
-#		exit "$WPSCAN_EXIT_CODE"
-#fi
-
-#if [ ! -f test/reports/wpscan-report.json ]; then
-#				echo "ERROR: WPScan report wasn't generated"
-#				exit 1
-#fi
