@@ -75,6 +75,21 @@ pipeline {
                     }
                 }
                 sh '''
+                   echo "Copy report started"
+
+                   docker run --rm \
+
+                     -v test_wpscan_reports:/data \
+
+                     -v "$PWD/test/reports:/out" \
+
+                     alpine \
+
+                     cp /data/wpscan-report.json /out/
+
+                   echo "Copy finished"
+                   '''
+                sh '''
                    echo "Reports:"
                    ls -lah test/reports
                    '''
