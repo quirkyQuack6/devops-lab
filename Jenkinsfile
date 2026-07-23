@@ -75,12 +75,10 @@ pipeline {
                     }
                 }
                 sh '''
-                   docker create --name wpscan-copy \
-                     -v test_wpscan_reports:/data \
-                     alpine
+                   CID=$(docker create -v test_wpscan_reports:/data alpine)
 
-                   docker cp wpscan-copy:/data/wpscan-report.json test/reports/wpscan-report.json
-                   docker rm wpscan-copy
+                   docker cp "$CID":/data/wpscan-report.json test/reports/wpscan-report.json
+                   docker rm "$CID"
                    '''
                 sh '''
                    echo "Reports:"
