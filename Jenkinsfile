@@ -79,7 +79,7 @@ pipeline {
                      -v test_wpscan_reports:/data \
                      alpine
 
-                   docker cp wpscan-copy:/data/wpscan_report.json test/reports/wpscan_report.json
+                   docker cp wpscan-copy:/data/wpscan-report.json test/reports/wpscan-report.json
                    docker rm wpscan-copy
                    '''
                 sh '''
