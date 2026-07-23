@@ -13,7 +13,7 @@ else
 			wordpress-cli wp core install \
 			--url=http://wordpress \
 			--title='testlab' \
-			--admin_user=pepino \
-			--admin_password=204melling204 \
-			--admin_email=vahrutdinov@gmail.com
+			--admin_user=${VAULT_WP_ADMIN} \
+			--admin_password=${VAULT_WP_ADMIN_PASS} \
+			--admin_email=${VAULT_WP_EMAIL}
 fi

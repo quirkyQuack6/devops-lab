@@ -10,6 +10,11 @@ def secrets = [
     ]],
     [path: 'secret/homelab/ci', engineVersion: 2, secretValues: [
         [envVar: 'VAULT_WPSCAN_API_TOKEN', vaultKey: 'WPSCAN_API_TOKEN']
+    ]],
+    [path: 'secret/homelab/test', engineVersion: 2, secretValues: [
+        [envVar: 'VAULT_WP_ADMIN', vaultKey: 'wp_admin'],
+        [envVar: 'VAULT_WP_ADMIN_PASS', vaultKey: 'wp_admin_pass'],
+        [envVar: 'VAULT_WP_EMAIL', vaultKey: 'wp_email']
     ]]
 ]
 
