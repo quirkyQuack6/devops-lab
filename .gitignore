@@ -9,14 +9,17 @@ wp_data/
 grafana_data/
 
 # Специфичные файлы для Linux/Архивов
-*.log
 .DS_Store
 
 # Terraform 
 *.tfstate
-*.backup
+*.tfstate.*
+*.tfplan
+**/.terraform/
+terraform.log
+crash.log
+
 *.iso
-*.terraform/
-*.xml
-*.hcl
+
+terraform/*.xml
 
