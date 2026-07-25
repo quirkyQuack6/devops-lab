@@ -66,7 +66,7 @@ resource "libvirt_cloudinit_disk" "vm1_init" {
   user_data = templatefile(
     "${path.module}/cloud-init.yaml.tftpl",
     {
-      ssh_public_key = trimspace(file("/home/vova/.ssh/id_ed25519.pub"))
+      ssh_public_key = trimspace(file(var.ssh_public_key_path))
     }
   )
   meta_data = file("${path.module}/meta-data")
