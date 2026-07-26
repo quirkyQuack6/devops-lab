@@ -38,10 +38,40 @@ pipeline {
             }
         }
 
-        stage('Lint & Validate') {
+        stage( "Terraform Format" ) {
+            steps {
+                sh "./scripts/terraform/fmt.sh"
+            }
+        }
+
+        stage("Terraform Init") {
+            steps {
+               sh "./scripts/terraform/init.sh"
+            }
+        }
+
+        stage("Terraform Validate") {
+            steps {
+               sh "./scripts/terraform/validate.sh"
+            }
+        }
+
+         stage("Terraform Plan") {
+            steps {
+               sh "./scripts/terraform/plan.sh"
+            }
+        }
+
+         stage("Terraform Apply") {
+            steps {
+               sh "./scripts/terraform/apply.sh"
+            }
+        }
+
+        stage('Ansible Validate') {
             steps {
                 echo 'Checking Ansible Playbook syntax...'
-                sh "./scripts/syntaxcheck.sh"
+                sh "./scripts/ansible/validate.sh"
             }
         }
    
@@ -50,7 +80,7 @@ pipeline {
                 echo 'Connecting to Vault and deploying via Ansible...'
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh "./scripts/deploy.sh"
+                        sh "./scripts/ansible/deploy.sh"
                     }
                 }
             }
