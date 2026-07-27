@@ -15,6 +15,10 @@ def secrets = [
         [envVar: 'VAULT_WP_ADMIN', vaultKey: 'wp_admin'],
         [envVar: 'VAULT_WP_ADMIN_PASS', vaultKey: 'wp_admin_pass'],
         [envVar: 'VAULT_WP_EMAIL', vaultKey: 'wp_email']
+    ]],
+    [path: 'secret/homelab/minio', engineVersion: 2, secretValues: [
+        [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'TERRAFORM_MINIO_ACCESS_KEY'],
+        [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'TERRAFORM_MINIO_SECRET_KEY']
     ]]
 ]
 
