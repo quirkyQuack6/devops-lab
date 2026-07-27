@@ -8,7 +8,7 @@ terraform {
   }
 
   backend "s3" {
-    endpoint = "http://192.168.2.21:9000"
+    endpoints.s3 = "http://192.168.2.21:9000"
 
     bucket = "terraform-state"
     key    = "homelab/terraform.tfstate"
