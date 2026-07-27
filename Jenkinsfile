@@ -44,31 +44,41 @@ pipeline {
 
         stage( "Terraform Format" ) {
             steps {
-                sh "./scripts/terraform/fmt.sh"
+               withVault([configuration: configuration, vaultSecrets: secrets]) {
+                   sh "./scripts/terraform/fmt.sh"
+               }
             }
         }
 
         stage("Terraform Init") {
             steps {
-               sh "./scripts/terraform/init.sh"
+               withVault([configuration: configuration, vaultSecrets: secrets]) {
+                   sh "./scripts/terraform/init.sh"
+               }
             }
         }
 
         stage("Terraform Validate") {
             steps {
-               sh "./scripts/terraform/validate.sh"
+               withVault([configuration: configuration, vaultSecrets: secrets]) {
+                   sh "./scripts/terraform/validate.sh"
+               }
             }
         }
 
          stage("Terraform Plan") {
             steps {
-               sh "./scripts/terraform/plan.sh"
+               withVault([configuration: configuration, vaultSecrets: secrets]) {
+                   sh "./scripts/terraform/plan.sh"
+               }
             }
         }
 
          stage("Terraform Apply") {
             steps {
-               sh "./scripts/terraform/apply.sh"
+               withVault([configuration: configuration, vaultSecrets: secrets]) {
+                   sh "./scripts/terraform/apply.sh"
+               }
             }
         }
 
