@@ -11,16 +11,16 @@ terraform {
     endpoint = "http://192.168.2.21:9000"
 
     bucket = "terraform-state"
-    key = "homelab/terraform.tfstate"
+    key    = "homelab/terraform.tfstate"
 
     region = "us-east-1"
 
     skip_credentials_validation = true
-    skip_metadata_api_check = true
-    skip_region_validation = true
-    skip_s3_checksum = true
-    skip_requesting_account_id = true
-    force_path_style = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    skip_requesting_account_id  = true
+    force_path_style            = true
   }
 }
 
