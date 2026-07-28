@@ -56,6 +56,10 @@ pipeline {
             steps {
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh '''
+                           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
+                           echo "SECRET_LENGTH=${#AWS_SECRET_ACCESS_KEY}"
+                        '''
                         sh "./scripts/terraform/init.sh"
                     }
                 }
