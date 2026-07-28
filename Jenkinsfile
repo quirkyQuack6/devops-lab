@@ -44,41 +44,51 @@ pipeline {
 
         stage( "Terraform Format" ) {
             steps {
-               withVault([configuration: configuration, vaultSecrets: secrets]) {
-                   sh "./scripts/terraform/fmt.sh"
-               }
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/fmt.sh"
+                    }
+                }
             }
         }
 
         stage("Terraform Init") {
             steps {
-               withVault([configuration: configuration, vaultSecrets: secrets]) {
-                   sh "./scripts/terraform/init.sh"
-               }
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/init.sh"
+                    }
+                }
             }
         }
 
         stage("Terraform Validate") {
             steps {
-               withVault([configuration: configuration, vaultSecrets: secrets]) {
-                   sh "./scripts/terraform/validate.sh"
-               }
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/validate.sh"
+                    }
+                }
             }
         }
 
          stage("Terraform Plan") {
             steps {
-               withVault([configuration: configuration, vaultSecrets: secrets]) {
-                   sh "./scripts/terraform/plan.sh"
-               }
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/plan.sh"
+                    }
+                }
             }
         }
 
          stage("Terraform Apply") {
             steps {
-               withVault([configuration: configuration, vaultSecrets: secrets]) {
-                   sh "./scripts/terraform/apply.sh"
-               }
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/apply.sh"
+                    }
+                }
             }
         }
 
