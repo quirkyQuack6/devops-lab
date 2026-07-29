@@ -31,6 +31,11 @@ def configuration = [
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
     environment {
         ANSIBLE_PRIVATE_KEY_FILE = "/var/jenkins_home/.ssh/id_ed25519"
     }
