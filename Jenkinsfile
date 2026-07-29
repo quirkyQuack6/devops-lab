@@ -89,6 +89,11 @@ pipeline {
                     }
                 }
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'terraform/tfplan', fingerprint: true
+                }
+            }
         }
 
          stage("Terraform Apply") {
