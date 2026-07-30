@@ -2,9 +2,25 @@ terraform {
   required_version = ">= 1.0"
   required_providers {
     libvirt = {
-      source = "dmacvicar/libvirt"
-      version = "0.9.8" 
+      source  = "dmacvicar/libvirt"
+      version = "0.9.8"
     }
+  }
+
+  backend "s3" {
+    endpoint = "http://192.168.2.21:9000"
+
+    bucket = "terraform-state"
+    key    = "homelab/terraform.tfstate"
+
+    region = "eu-central-1"
+
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    skip_requesting_account_id  = true
+    use_path_style              = true
   }
 }
 
@@ -31,8 +47,8 @@ resource "libvirt_volume" "ubuntu_base" {
 }
 
 resource "libvirt_pool" "home_pool" {
-  name     = "kvm_home_pool"
-  type     = "dir"
+  name = "kvm_home_pool"
+  type = "dir"
 
   target = {
     path = "/home/vova/kvm-images"
@@ -41,15 +57,15 @@ resource "libvirt_pool" "home_pool" {
 
 # 2. Создаем индивидуальный виртуальный диск для будущей ВМ на основе скачанного образа
 resource "libvirt_volume" "vm1_disk" {
-  name 		 = "homelab-target-disk.qcow2"
-  pool 		 = libvirt_pool.home_pool.name
+  name = "homelab-target-disk.qcow2"
+  pool = libvirt_pool.home_pool.name
   target = {
     format = {
-      type  = "qcow2"
+      type = "qcow2"
     }
   }
 
-  capacity = 15032385536 
+  capacity = 15032385536
 
   backing_store = {
     path = libvirt_volume.ubuntu_base.path
@@ -66,10 +82,10 @@ resource "libvirt_cloudinit_disk" "vm1_init" {
   user_data = templatefile(
     "${path.module}/cloud-init.yaml.tftpl",
     {
-      ssh_public_key = trimspace(file("/home/vova/.ssh/id_ed25519.pub"))
+      ssh_public_key = trimspace(file(var.ssh_public_key_path))
     }
   )
-  meta_data = file("${path.module}/meta-data")
+  meta_data      = file("${path.module}/meta-data")
   network_config = file("${path.module}/network-config")
 }
 
@@ -87,29 +103,29 @@ resource "libvirt_volume" "vm1_cloudinit" {
 
 # 4. Описываем саму виртуальную машину
 resource "libvirt_domain" "homelab_vm" {
-  name 	 = "homelab-devops-node"
-  type	 = "kvm"
+  name   = "homelab-devops-node"
+  type   = "kvm"
   memory = 2097152
-  vcpu	 = 2
+  vcpu   = 2
 
   cpu = {
     mode = "host-passthrough"
   }
 
   os = {
-    type = "hvm"
-    type_arch = "x86_64"
+    type         = "hvm"
+    type_arch    = "x86_64"
     type_machine = "pc"
   }
 
   devices = {
     # Привязываем диски
     disks = [
-        {
+      {
         # Основной диск
         source = {
           volume = {
-            pool	 = libvirt_volume.vm1_disk.pool
+            pool   = libvirt_volume.vm1_disk.pool
             volume = libvirt_volume.vm1_disk.name
           }
         }
@@ -129,7 +145,7 @@ resource "libvirt_domain" "homelab_vm" {
         source = {
           volume = {
             pool   = libvirt_volume.vm1_cloudinit.pool
-            volume = libvirt_volume.vm1_cloudinit.name	
+            volume = libvirt_volume.vm1_cloudinit.name
           }
         }
         target = {
@@ -161,7 +177,7 @@ resource "libvirt_domain" "homelab_vm" {
 
     serial = [
       {
-        type = "pty"
+        type   = "pty"
         target = {}
       }
     ]
@@ -172,7 +188,7 @@ resource "libvirt_domain" "homelab_vm" {
         target = {}
       }
     ]
-	
+
     #graphics = [
     #  {
     #    type = "spice"

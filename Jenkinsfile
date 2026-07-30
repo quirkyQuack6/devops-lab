@@ -15,6 +15,10 @@ def secrets = [
         [envVar: 'VAULT_WP_ADMIN', vaultKey: 'wp_admin'],
         [envVar: 'VAULT_WP_ADMIN_PASS', vaultKey: 'wp_admin_pass'],
         [envVar: 'VAULT_WP_EMAIL', vaultKey: 'wp_email']
+    ]],
+    [path: 'secret/homelab/minio', engineVersion: 2, secretValues: [
+        [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'TERRAFORM_MINIO_ACCESS_KEY'],
+        [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'TERRAFORM_MINIO_SECRET_KEY']
     ]]
 ]
 
@@ -27,6 +31,11 @@ def configuration = [
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
     environment {
         ANSIBLE_PRIVATE_KEY_FILE = "/var/jenkins_home/.ssh/id_ed25519"
     }
@@ -38,10 +47,75 @@ pipeline {
             }
         }
 
-        stage('Lint & Validate') {
+        stage( "Terraform Format" ) {
+            steps {
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/fmt.sh"
+                    }
+                }
+            }
+        }
+
+        stage("Terraform Init") {
+            steps {
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh '''
+                           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
+                           echo "SECRET_LENGTH=${#AWS_SECRET_ACCESS_KEY}"
+                        '''
+                        sh "./scripts/terraform/init.sh"
+                    }
+                }
+            }
+        }
+
+        stage("Terraform Validate") {
+            steps {
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/validate.sh"
+                    }
+                }
+            }
+        }
+
+         stage("Terraform Plan") {
+            steps {
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/plan.sh"
+                    }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'terraform/tfplan', fingerprint: true
+                }
+            }
+        }
+
+         stage("Terraform Apply") {
+            steps {
+                script {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh "./scripts/terraform/apply.sh"
+                    }
+                }
+            }
+        }
+
+        stage('Generate Inventory') {
+            steps {
+                sh "./scripts/ansible/generate_inventory.sh"
+            }
+        }
+
+        stage('Ansible Validate') {
             steps {
                 echo 'Checking Ansible Playbook syntax...'
-                sh "./scripts/syntaxcheck.sh"
+                sh "./scripts/ansible/validate.sh"
             }
         }
    
@@ -50,7 +124,7 @@ pipeline {
                 echo 'Connecting to Vault and deploying via Ansible...'
                 script {
                     withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh "./scripts/deploy.sh"
+                        sh "./scripts/ansible/deploy.sh"
                     }
                 }
             }

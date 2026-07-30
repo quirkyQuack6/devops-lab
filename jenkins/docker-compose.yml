@@ -1,16 +1,27 @@
 services:
   jenkins:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HTTP_PROXY: http://192.168.2.21:10808
+        HTTPS_PROXY: http://192.168.2.21:10808
     container_name: jenkins-ci
     network_mode: host
     environment:
       - JENKINS_OPTS=--httpPort=8084
+      - HTTP_PROXY=http://192.168.2.21:10808
+      - HTTPS_PROXY=http://192.168.2.21:10808
+      - http_proxy=http://192.168.2.21:10808
+      - https_proxy=http://192.168.2.21:10808
     volumes:
       - /opt/jenkins:/var/jenkins_home
       - /home/vova/.ssh:/var/jenkins_home/.ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock
     group_add:
       - "960"
+      - "955"
     restart: unless-stopped
 
   vault:

@@ -1,115 +1,298 @@
-# HomeLab DevOps Node: IaC, Automated Monitoring & Alerting & Jenkins CI/CD Pipeline
+# HomeLab DevOps Platform
 
-Учебный проект (лабораторная работа) по автоматизации развертывания изолированной DevOps-инфраструктуры в KVM на базе Arch Linux. Проект реализует концепции **Infrastructure as Code (IaC)**, **Configuration as Code (CaC)** и **Dashboard as Code** с построением сквозного локального конвейера непрерывной интеграции и доставки (CI/CD).
+## Infrastructure as Code • Configuration as Code • CI/CD • Monitoring • Secrets Management
 
----
+Домашняя DevOps-платформа, демонстрирующая полный цикл работы с современной инфраструктурой: Infrastructure as Code, Configuration as Code, управление секретами, мониторинг и автоматизированный CI/CD-конвейер на базе виртуализации KVM.
 
-## Архитектура стека
-
-* **Хост-система**: Arch Linux + `libvirt` (QEMU/KVM) + `nftables`
-* **Инфраструктурный слой (IaC)**: Terraform v1.15 + провайдер `dmacvicar/libvirt` (v0.9.8)
-* **CI/CD Оркестратор**: Jenkins LTS (запущен в Docker, режим `network_mode: host`)
-* **Управление секретами**: HashiCorp Vault (запущен в Docker)
-* **Управление конфигурацией**: Ansible
-* **Виртуальная машина**: Ubuntu 24.04 LTS (Noble Numbat) Cloud Image
-* **Приложения и Мониторинг**: Docker Compose стек из 10 контейнеров на ВМ:
-  *   *Приложения*: WordPress, MySQL, Redis
-  *   *Монитооринг (PLG)*: Prometheus, Grafana, Loki, Promtail, cAdvisor, Node Exporter, MySQL Exporter
-  *   *Алертинг*: Alertmanager, Telegram Bot
+Проект автоматически создает виртуальную машину с помощью Terraform, настраивает её через Ansible, разворачивает стек приложений и мониторинга с использованием Docker Compose и управляет всем процессом через Jenkins Multibranch Pipeline с интеграцией HashiCorp Vault.
 
 ---
 
-## Сетевая топология и обход блокировок
+## Project Overview
 
-Для успешного скачивания Docker-образов и скриптов, а также для отправки уведомлений в Telegram, в условиях ограничений Docker Hub для СНГ настроена гибридная прокси-маршрутизация:
-1. **Прокси на хосте**: Приложение `v2rayN` / `Xray` слушает порт `10808` на интерфейсе `192.168.122.1` (KVM-мост хоста) с включенной опцией *Allow LAN*.
-2. **Файрвол хоста (`nftables`)**: В цепочку `chain input` добавлено правило `tcp dport 10808 accept` для беспрепятственного прохождения трафика из подсети виртуалки.
-3. **Зеркала**: Демон Docker внутри Ubuntu настроен на работу через зеркала, что гарантирует скачивание слоев образов.
+Цель проекта — не просто изучение отдельных инструментов, а построение максимально приближенного к реальной практике DevOps-процесса.
+
+В рамках проекта реализован полностью воспроизводимый процесс, при котором весь жизненный цикл инфраструктуры — от создания виртуальной машины до развертывания приложений — описан в коде, хранится в Git и автоматически выполняется средствами CI/CD.
+
+На текущий момент проект демонстрирует следующие подходы:
+
+- Infrastructure as Code (Terraform)
+- Configuration as Code (Ansible)
+- Dashboard as Code (автоматическое развертывание Grafana Dashboard)
+- Secrets Management (HashiCorp Vault)
+- Continuous Integration & Continuous Deployment (Jenkins Multibranch Pipeline)
+- Централизованный мониторинг и алертинг (Prometheus + Grafana + Loki)
 
 ---
 
-## Схема работы CI/CD Pipeline (Jenkinsfile)
-
-Проект использует GitFlow с защитой ветки `main`. Прямые коммиты запрещены — изменения вносятся только через Feature-ветки и Code Review в Pull Request.
+## Architecture Overview
 
 ```text
-➔ Изменение кода на Arch Linux
-➔ git push
-➔ Открытие Pull Request
-➔ Merge в main
-➔ Автоматический триггер Jenkins (SCM Polling):
-┌─────────────────────────────────────────────────────────────────────────┐
-│ Контейнер Jenkins (Кастомный Dockerfile c Ansible & Host Network)       │
-│                                                                         │
-│ 1. Этап 'Checkout Code': Скачивает стабильный main-код из GitHub        │
-│ 2. Этап 'Lint & Validate': Проверяет синтаксис плейбука Ansible         │
-│ 3. Этап 'Vault Auth': Безопасная передача секретов из HashiCorp Vault   │
-│ 4. Этап 'Deploy Stack': Запускает ansible-playbook по SSH-ключам        │
-└─────────────────────────────────────────────────────────────────────────┘
-➔ KVM Виртуальная машина полностью обновлена
+                 Github Repository
+                          |
+                          ▼
+             Pull Request - Merge в main
+                          |
+                          ▼
+            Jenkins Multibranch Pipeline
+                          |
+          ┌───────────────┼────────────────┐
+          |               |                |
+          ▼               ▼                ▼
+   HashiCorp Vault     Terraform        Ansible
+      (Secrets)          (IaC)           (CaC)
+          |               |                |
+          └───────────────┼────────────────┘
+                          ▼
+              Ubuntu 24.04 Virtual Machine
+                          |
+                          ▼
+                 Docker Compose Stack
+                          |
+     ┌────────────────────┼──────────────────────┐
+ ordpress            Monitoring              Alerting
+MySQL Redis    Prometheus Grafana Loki     Alertmanager
 ```
 
 ---
 
-## Пошаговое развертывание 
+## Technology Stack
 
-### Шаг 1: Подготовка инфраструктуры (Terraform)
-Перейдите в директорию Terraform, инициализируйте провайдер и создайте ВМ:
-```bash
-cd terraform
-terraform init -upgrade
-terraform apply
-```
-*Terraform требуется до 150 секунд, чтобы поднять домен подключить ISO-образ Cloud-Init как CD-ROM устройство и дождаться выделения IP-адреса по DHCP.*
+Infrastructure:
+- Arch Linux
+- QEMU / KVM
+- libvirt
 
-### Шаг 2: Запуск сервера автоматизации (Jenkins)
-Соберите кастомный образ Jenkins со встроенным Ansible и запустите Jenkins и Vault:
-```bash
-cd ../jenkins
-docker compose up -d --build
-```
-1. Откройте интерфейс: `http://localhost:8084`.
-2. Заберите первичный пароль из логов хоста: `docker logs jenkins`.
-3. Создайте элемент типа **Pipeline**, укажите ссылку на ваш Github-репозиторий, ветку `*/main` и режим опроса `Poll SCM` со значением например `H/5 * * * *`.
+Automation:
+- Jenkins
+- Terraform
+- Ansible
 
-### Шаг 3: Настройка системы безопасности
-1. Авторизуйте CLI-сессию внутри контейнера Vault с помощью мастер-токена:
-   ```bash
-   docker exec -it vault-server vault login <ваш-токен>
-   ```
-2. Запишите секреты бд и мониторинга в хранилище по пути `secret/homelab/db`:
-   ```bash
-   docker exec -it vault-server vault kv put secret/homelab/db \
-     mysql_root_password="ваш_root_пароль" \
-     mysql_user="wp_admin" \
-     mysql_password="ваш_пароль_для_user" \
-     mysql_exporter_user="exporter" \
-     mysql_exporter_password="ваш_пароль_для_exporter" \
-     mysql_database="wordpress" \
-     telegram_bot_token="ваш_токен" \
-     telegram_chat_id="ваш_чат_id"
-   ```
-3. Проверьте корректность записи данных в хранилище:
-   ```bash
-   docker exec -it vault-server vault kv get sescret/homelab/db
-   ```     
-4. Установите плагин `HashiCorp Vault Plugin` в Jenkins.
-5. В разделе *Manage Jenkins ➔ Credentials* добавьте секрет с типом **Vault Token Credential**. Укажите ID `vault-root-token` и вставьте <ваш_токен>.
+Monitoring:
+- Prometheus
+- Grafana
+- Loki
 
-
-### Шаг 4. Автоматический запуск
-Убедитесь, что актуальный IP-адрес вашей ВМ прописан в `ansible/hosts.ini`, сделайте коммит изменений и влейте Pull Request. Через 5 минут Jenkins автоматически выполнит деплой всего стека.
+Security:
+- HashiCorp Vault
+- Nftables
 
 ---
 
-## Результат работы и концепция Dashboard as Code
+## Infrastructure as Code
 
-После успешного завершения пайплайна в вашей системе будут развернуты:
-*   **Веб-сайт**: `http://<IP_ВМ>:8080` (WordPress + MySQL + Redis-кэш)
-*   **Система Мониторинга**: `http://<IP_ВМ>:3000` (Grafana)
+- Terraform 1.15
+- Провайдер dmacvicar/libvirt
 
-Все 6 встроенных дашбордов оживают **мгновенно и автоматически**.
-- Метрики: `uid: prometheus-production`
-- Логи: `uid: loki-production`
+Хранение состояния Terraform:
 
-Флаг `allowUiUpdates: true` в файле `dashboard_provider.yaml` позволяет редактировать и сохранять панели из веб-интерфейса Grafana
+- MinIO (S3 Backend)
+
+---
+
+## Configuration as Code
+
+- Ansible
+
+Автоматизируется:
+
+- Установка Docker;
+- Настройка Docker Engine;
+- Конфигурация Registry Mirrors;
+- Настройка прокси;
+- Развертывание Docker Compose;
+- Автоматическая генерация Ansible Inventory на основе Terraform Outputs.
+
+---
+
+## CI/CD Workflow and Environment Strategy
+
+Проект использует Jenkins Multibranch Pipeline совместно с GitHub и GitFlow workflow.
+
+Каждая ветка разработки автоматически обнаруживается Jenkins и запускается в отдельном pipeline execution. Это позволяет проверять изменения до их попадания в основную ветку.
+
+### Feature branch workflow
+
+Разработка новых функций выполняется в отдельных ветках:
+
+```text
+feature/*
+      |
+      ▼
+Jenkins Multibranch Pipeline
+      |
+      ├── Checkout Code
+      ├── Terraform Init
+      ├── Terraform Plan
+      ├── Ansible Validate
+      └── Automated Tests
+```
+
+
+После успешной проверки изменения отправляются в Pull Request.
+
+После Code Review выполняется merge в main.
+
+### Main branch deployment
+
+После изменения ветки main Jenkins выполняет deployment pipeline:
+
+```text
+main
+ |
+ ▼
+Jenkins Multibranch Pipeline
+ |
+ ├── Получение секретов из HashiCorp Vault
+ ├── Terraform Init
+ ├── Terraform Plan
+ ├── Сохранение Terraform Plan как build artifact
+ ├── Terraform Apply
+ ├── Генерация Ansible Inventory
+ ├── Проверка Ansible Playbook
+ ├── Ansible Deployment
+ └── Проверка доступности сервисов
+```
+
+Для защиты состояния инфраструктуры отключено параллельное выполнение Jenkins build.
+
+Terraform State хранится в удаленном S3-совместимом backend на базе MinIO.
+
+---
+
+## Automated Test Environment
+
+Для разработки новых возможностей используется автоматическое тестовое окружение.
+
+Jenkins pipeline способен полностью воспроизвести окружение из кода:
+
+- Terraform создает виртуальную машину Ubuntu через KVM/libvirt;
+- Terraform получает состояние инфраструктуры из MinIO backend;
+- Ansible выполняет первоначальную настройку системы;
+- Docker Compose разворачивает сервисный стек;
+- выполняются проверки работоспособности компонентов.
+
+Окружение не требует ручной настройки и полностью описано через:
+
+- Infrastructure as Code (Terraform);
+- Configuration as Code (Ansible);
+- Pipeline as Code (Jenkinsfile);
+- Secrets Management (HashiCorp Vault).
+
+---
+
+## Secrets Management
+
+Все чувствительные данные хранятся в HashiCorp Vault.
+
+В Vault размещаются:
+
+- Учетные данные MySQL;
+- Telegram Bot Token;
+- Учетные данные Grafana;
+- Учетные данные MinIO;
+- Параметры WordPress и тестового окружения.
+
+Секреты никогда не попадают в Git-репозиторий.
+
+---
+
+## Monitoring and Observability
+
+Развернут стек мониторинга:
+
+- Prometheus
+- Grafana
+- Loki
+- Promtail
+- Node Exporter
+- MySQL Exporter
+- cAdvisor
+- Alertmanager
+
+Все дашборды Grafana автоматически создаются при развертывании инфраструктуры.
+
+---
+
+## Deployment
+
+Terraform автоматически создает:
+
+- Storage Pool;
+- Базовый образ Ubuntu;
+- Cloud-Init ISO;
+- Виртуальные диски;
+- Виртуальную машину.
+
+Состояние Terraform хранится в удаленном S3-совместимом backend MinIO.
+
+## Implemented Features
+
+✅ Infrastructure as Code
+
+- Создание и управление виртуальной инфраструктурой через Terraform.
+
+✅ Configuration as Code
+
+- Автоматическое конфигурирование сервера через Ansible.
+
+✅ Remote Terraform State
+
+- Хранение Terraform State в MinIO S3 backend.
+
+✅ Secrets Management
+
+- Централизованное управление секретами через HashiCorp Vault.
+
+✅ Dynamic Inventory
+
+- Автоматическая генерация Ansible Inventory из Terraform outputs.
+
+✅ CI/CD
+
+- Jenkins Multibranch Pipeline.
+- Автоматический план и деплой инфраструктуры
+
+✅ Monitoring Stack
+
+- Prometheus
+- Grafana
+- Loki
+- Promtail
+
+✅ Alerting
+
+- Alertmanager
+- Telegram notifications.
+
+---
+
+## Roadmap
+
+Планируется добавить:
+
+- Trivy (анализ Docker-образов);
+- OWASP Dependency-Check;
+- Docker Bench Security;
+- Тестирование Ansible через Molecule;
+- Миграцию инфраструктуры в Kubernetes;
+- Helm Charts;
+- GitOps с использованием Argo CD;
+- Отказоустойчивое развертывание;
+- Автоматическое резервное копирование.
+
+---
+
+## Engineering Approach
+
+В отличие от большинства учебных примеров, демонстрирующих отдельные инструменты из DevOps-стека, данный проект ориентирован на построение целостного инженерного процесса.
+
+Основной целью было не только изучение отдельных технологий, а их интеграция в единую систему:
+
+- инфраструктура создается автоматически через Infrastructure as Code;
+- конфигурация серверов управляется через Configuration as Code;
+- секреты хранятся централизованно и не попадают в Git;
+- изменения проходят через контролируемый CI/CD процесс;
+- состояние инфраструктуры и работоспособность сервисов контролируются средствами мониторинга и алертинга.
+
+Проект является первым этапом развития собственного DevOps HomeLab, который в дальнейшем будет расширяться поддержкой Kubernetes, Helm, GitOps и облачно-ориентированных практик.
