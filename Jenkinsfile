@@ -106,6 +106,12 @@ pipeline {
             }
         }
 
+        stage('Generate Inventory') {
+            steps {
+                sh "./scripts/ansible/generate_inventory.sh"
+            }
+        }
+
         stage('Ansible Validate') {
             steps {
                 echo 'Checking Ansible Playbook syntax...'
