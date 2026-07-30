@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-VM_IP=$(terraform -chdir="$REPO_ROOt/terraform" output -raw interfaces)
+VM_IP=$(terraform -chdir="$REPO_ROOT/terraform" output -raw interfaces)
 
 cat > "$REPO_ROOT/ansible/hosts.ini" <<EOF
 [node]
