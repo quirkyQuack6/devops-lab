@@ -26,3 +26,6 @@ terraform/*.xml
 # Minio
 minio/data/
 minio/config/
+
+# Ansible
+ansible/hosts.ini
