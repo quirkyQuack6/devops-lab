@@ -28,10 +28,6 @@ def configuration = [
   engineVersion: 2
 ]
 
-def hostWorkspace = env.WORKSPACE.replace(
-    "/var/jenkins_home",
-    "/opt/jenkins"
-)
 
 pipeline {
     agent any
@@ -168,8 +164,14 @@ pipeline {
         }
         stage('Trivy Config Scan') {
             steps {
-                withEnv(["HOST_WORKSPACE=${hostWorkspace}"]) {
-                    sh "./scripts/test/run-trivy-config.sh"
+                script {
+                    def hostWorkspace = env.WORKSPACE.replace(
+                        "/var/jenkins_home",
+                        "/opt/jenkins"
+                    )
+                    withEnv(["HOST_WORKSPACE=${hostWorkspace}"]) {
+                        sh "./scripts/test/run-trivy-config.sh"
+                    }
                 }
             }
             post {
