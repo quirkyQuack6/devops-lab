@@ -11,12 +11,19 @@ REPORT_DIR="test/reports/trivy"
 
 mkdir -p "$REPORT_DIR"
 
+echo "PWD=$(pwd)"
+echo "REPORT_DIR=$REPORT_DIR"
+ls -la
+ls -la test
+ls -la test/reports || true
+find . -maxdepth 2 -type f | sort
+
 docker run --rm \
 	-v "$PWD":/work \
 	-w /work \
 	aquasec/trivy:0.72.0 \
 	config . \
-  --skip-dirs config/grafana/dashboards	\
+	--skip-dirs config/grafana/dashboards	\
 	--skip-dirs minio/data \
 	--skip-dirs test/reports \
 	--format json \
