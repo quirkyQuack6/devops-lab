@@ -29,8 +29,8 @@ def configuration = [
 ]
 
 def hostWorkspace = env.WORKSPACE.replace(
-    "var/jenkins_home",
-    "opt/jenkins"
+    "/var/jenkins_home",
+    "/opt/jenkins"
 )
 
 pipeline {
