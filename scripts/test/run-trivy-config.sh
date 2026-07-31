@@ -7,19 +7,23 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$REPO_ROOT"
 
+WORKSPACE="${HOST_WORKSPACE:-$PWD}"
+echo "Workspace for Docker: $WORKSPACE"
+
 REPORT_DIR="test/reports/trivy"
 
 mkdir -p "$REPORT_DIR"
 
-echo "PWD=$(pwd)"
-echo "REPORT_DIR=$REPORT_DIR"
-ls -la
-ls -la test
-ls -la test/reports || true
-find . -maxdepth 2 -type f | sort
+# Отладка
+#echo "PWD=$(pwd)"
+#echo "REPORT_DIR=$REPORT_DIR"
+#ls -la
+#ls -la test
+#ls -la test/reports || true
+#find . -maxdepth 2 -type f | sort
 
 docker run --rm \
-	-v "$PWD":/work \
+	-v "$WORKSPACE":/work \
 	-w /work \
 	aquasec/trivy:0.72.0 \
 	config . \
