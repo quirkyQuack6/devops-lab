@@ -161,6 +161,16 @@ pipeline {
                 sh "./scripts/test/check-report.sh"
             }
         }
+        stage('Trivy Config Scan') {
+            steps {
+                sh "./scripts/test/run-trivy-config.sh"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test/reports/trivy/config.json', fingerprint: true
+                }
+            }
+        }
     }
 
     post {
