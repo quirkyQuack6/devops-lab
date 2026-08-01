@@ -19,10 +19,13 @@ while read -r image; do
 		
 		docker run --rm \
 				-v /var/run/docker.sock:/var/run/docker.sock \
+				-v trivy-cache:/root/.cache/trivy \
 				-v "$WORKSPACE":/work \
 				-w /work \
 				aquasec/trivy:0.72.0 \
 				image \
+				--scanners vuln \
+				--no-progress \
 				--format json \
 				--output "$REPORT_DIR/$(echo "$image" | tr '/:' '__').json" \
 				"$image"
