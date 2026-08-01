@@ -11,4 +11,4 @@ find . -name "docker-compose*.yml" -print0 |
 while IFS= read -r -d '' compose; do
 		docker compose -f "$compose" config --no-interpolate \
 				| awk '/image:/ {print $2}'
-done | sort -u
+done | sort -u | grep -v '^alpine$'
