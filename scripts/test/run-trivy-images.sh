@@ -8,7 +8,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 REPORT_DIR="test/reports/trivy/images"
-REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
 
 mkdir -p "$REPORT_DIR"
 
@@ -22,7 +21,9 @@ docker run --rm \
 
 while read -r image; do
 		echo "Scanning $image..."
-		
+
+		REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
+
 		timeout 10m docker run --rm \
 				-v /var/run/docker.sock:/var/run/docker.sock \
 				-v trivy-cache:/root/.cache/trivy \
