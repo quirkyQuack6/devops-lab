@@ -176,7 +176,7 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'test/reports/trivy/config.json', fingerprint: true
+                    archiveArtifacts artifacts: 'test/reports/trivy/*', fingerprint: true
                 }
             }
         }
