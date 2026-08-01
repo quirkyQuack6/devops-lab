@@ -24,18 +24,24 @@ while read -r image; do
 
 		REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
 
-		timeout 10m docker run --rm \
-				-v /var/run/docker.sock:/var/run/docker.sock \
-				-v trivy-cache:/root/.cache/trivy \
-				-v "$WORKSPACE/$REPORT_DIR":/reports \
-				aquasec/trivy:0.72.0 \
-				image \
-				--scanners vuln \
-				--no-progress \
-				--skip-db-update \
-				--format json \
-				--output "/reports/$REPORT_FILE" \
-				"$image"
+		for attempt in 1 2; do
+		    if timeout 5m docker run --rm \
+				     -v /var/run/docker.sock:/var/run/docker.sock \
+				     -v trivy-cache:/root/.cache/trivy \
+				     -v "$WORKSPACE/$REPORT_DIR":/reports \
+				     aquasec/trivy:0.72.0 \
+				     image \
+				     --scanners vuln \
+				     --no-progress \
+				     --skip-db-update \
+				     --format json \
+				     --output "/reports/$REPORT_FILE" \
+				     "$image"; then
+				    break
+				fi
+				echo "Retry $attempt for $image"
+				sleep 5
+		done
 
 done < <(./scripts/test/get-docker-images.sh)
 
