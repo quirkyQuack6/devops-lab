@@ -27,6 +27,7 @@ docker run --rm \
 	-w /work \
 	aquasec/trivy:0.72.0 \
 	config . \
+	--ignorefile .trivyignore \
 	--skip-dirs config/grafana/dashboards	\
 	--skip-dirs minio/data \
 	--skip-dirs test/reports \
