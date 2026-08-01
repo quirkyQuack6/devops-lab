@@ -180,6 +180,24 @@ pipeline {
                 }
             }
         }
+        stage('Trivy Image Scan') {
+            steps {
+                script {
+                    def hostWorkspace = env.WORKSPACE.replace(
+                        "/var/jenkins_home",
+                        "/opt/jenkins"
+                    )
+                    withEnv(["HOST_WORKSPACE=${hostWorkspace}"]) {
+                        sh "./scripts/test/run-trivy-images.sh"
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test/reports/trivy/**', fingerprint: true
+                }
+            }'
+        }
     }
 
     post {
