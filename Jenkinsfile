@@ -196,7 +196,7 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: 'test/reports/trivy/**', fingerprint: true
                 }
-            }'
+            }
         }
     }
 
