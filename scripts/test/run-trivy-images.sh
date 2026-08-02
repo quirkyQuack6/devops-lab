@@ -10,6 +10,7 @@ cd "$REPO_ROOT"
 REPORT_DIR="test/reports/trivy/images"
 
 mkdir -p "$REPORT_DIR"
+rm -f "$REPORT_DIR/skipped-images.txt"
 
 WORKSPACE="${HOST_WORKSPACE:-$PWD}"
 echo "Workspace for Docker: $WORKSPACE"
@@ -54,7 +55,7 @@ while read -r image; do
 		
 		if [[ "$success" != true ]]; then
 				echo "Skipping $image"
-				echo "$image" >> "$REPORT_DIR/skipped-images.txt"
+				echo "$image - failed after 3 attempts" >> "$REPORT_DIR/skipped-images.txt"
 		fi
 
 done < <(./scripts/test/get-docker-images.sh)
