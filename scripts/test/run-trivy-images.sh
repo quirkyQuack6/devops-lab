@@ -55,7 +55,10 @@ while read -r image; do
 		
 		if [[ "$success" != true ]]; then
 				echo "Skipping $image"
-				echo "$image - failed after 3 attempts" >> "$REPORT_DIR/skipped-images.txt"
+				printf "[%s] %s - failed after 3 attempts\n" \
+               "$(date '+%F %T')" \
+               "$image" \ 
+			         >> "$REPORT_DIR/skipped-images.txt"
 		fi
 
 done < <(./scripts/test/get-docker-images.sh)
