@@ -194,6 +194,10 @@ pipeline {
             }
             post {
                 always {
+                    sh '''
+                    echo "=== Trivy reports ==="
+                    find test/reports/trivy -type f -ls || true
+                    '''
                     archiveArtifacts artifacts: 'test/reports/trivy/**', fingerprint: true
                 }
             }
