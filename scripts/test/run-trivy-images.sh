@@ -23,7 +23,8 @@ while read -r image; do
 		echo "Scanning $image..."
 
 		REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
-		success=false
+    success=false
+		LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').log"
 
 		for attempt in 1 2 3; do
 		    if timeout 5m docker run --rm \
@@ -37,19 +38,22 @@ while read -r image; do
 				     --skip-db-update \
 				     --format json \
 				     --output "/reports/$REPORT_FILE" \
-				     "$image"; then
+				     "$image" \
+						 >"$LOG_FILE" 2>&1;
+		    then
 				    echo "✓ Scan completed"
+						rm -f "$LOG_FILE"
 						success=true
 				    break
 				fi
 				echo "Attempt $attempt failed"
-				echo "Retrying..."
-				sleep 5
+				if (( attempt != 3 )); then
+						echo "Retrying..."
+				fi
 		done
-
-		if ! $success; then
+		
+		if [[ "$success" != true ]]; then
 				echo "Skipping $image"
-				continue
 		fi
 
 done < <(./scripts/test/get-docker-images.sh)
