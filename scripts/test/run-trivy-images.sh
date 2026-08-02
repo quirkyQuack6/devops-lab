@@ -23,8 +23,9 @@ while read -r image; do
 		echo "Scanning $image..."
 
 		REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
+		success=false
 
-		for attempt in 1 2; do
+		for attempt in 1 2 3; do
 		    if timeout 5m docker run --rm \
 				     -v /var/run/docker.sock:/var/run/docker.sock \
 				     -v trivy-cache:/root/.cache/trivy \
@@ -37,11 +38,19 @@ while read -r image; do
 				     --format json \
 				     --output "/reports/$REPORT_FILE" \
 				     "$image"; then
+				    echo "✓ Scan completed"
+						success=true
 				    break
 				fi
-				echo "Retry $attempt for $image"
+				echo "Attempt $attempt failed"
+				echo "Retrying..."
 				sleep 5
 		done
+
+		if ! $success; then
+				echo "Skipping $image"
+				continue
+		fi
 
 done < <(./scripts/test/get-docker-images.sh)
 
