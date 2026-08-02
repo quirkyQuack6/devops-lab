@@ -24,7 +24,7 @@ while read -r image; do
 
 		REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
     success=false
-		LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').log"
+		LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
 		for attempt in 1 2 3; do
 		    if timeout 5m docker run --rm \
@@ -54,6 +54,7 @@ while read -r image; do
 		
 		if [[ "$success" != true ]]; then
 				echo "Skipping $image"
+				echo "$image" >> "$REPORT_DIR/skipped-images.txt"
 		fi
 
 done < <(./scripts/test/get-docker-images.sh)
