@@ -8,6 +8,9 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 REPORT_DIR="test/reports/trivy/images"
+scanned=0
+succeeded=0
+failed=0
 
 mkdir -p "$REPORT_DIR"
 rm -f "$REPORT_DIR/skipped-images.txt"
@@ -45,19 +48,30 @@ while read -r image; do
             echo "✓ Scan completed"
             rm -f "$LOG_FILE"
             success=true
+            $scanned+=1
+            $succeeded+=1
             break
         fi
         echo "Attempt $attempt failed"
         if (( attempt != 3 )); then
             echo "Retrying..."
+            sleep 10
         fi
     done
 		
     if [[ "$success" != true ]]; then
         echo "Skipping $image"
+        $scanned+=1
+        $failed+=1
         printf "[%s] %s - failed after 3 attempts\n" \
                "$(date '+%F %T')" "$image" >> "$REPORT_DIR/skipped-images.txt"
     fi
 
 done < <(./scripts/test/get-docker-images.sh)
 
+echo -e "==========================
+Trivy image scan summary
+==========================
+Scanned: $scanned
+Succeeded: $succeeded
+Failed: $failed"
