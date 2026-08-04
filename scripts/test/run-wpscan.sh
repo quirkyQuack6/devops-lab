@@ -30,5 +30,10 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
     --format json \
 		--output /reports/wpscan-report.json
 
-echo "WPScan finished"
+echo "==========================
+WPScan summary
+==========================
+Target: http://wordpress
+Report: test/reports/wpscan-report.json
+Status: completed"
 

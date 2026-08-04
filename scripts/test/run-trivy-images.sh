@@ -16,7 +16,6 @@ mkdir -p "$REPORT_DIR"
 rm -f "$REPORT_DIR/skipped-images.txt"
 
 WORKSPACE="${HOST_WORKSPACE:-$PWD}"
-echo "Workspace for Docker: $WORKSPACE"
 
 docker run --rm \
     -v trivy-cache:/root/.cache/trivy \
@@ -86,4 +85,5 @@ if (( failed > 0 )); then
 fi
 
 echo "Reports saved to:
-  test/reports/trivy/images"
+  test/reports/trivy/images
+=========================="

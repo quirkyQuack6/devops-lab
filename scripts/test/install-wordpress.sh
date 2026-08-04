@@ -9,11 +9,15 @@ if docker compose -f test/docker-compose.test.yml run --rm \
 		wordpress-cli wp --url=http://wordpress core is-installed; then
 		echo "Alresdy installed"
 else
-		docker compose -f test/docker-compose.test.yml run --rm\
-			wordpress-cli wp core install \
-			--url=http://wordpress \
-			--title='testlab' \
-			--admin_user=${VAULT_WP_ADMIN} \
-			--admin_password=${VAULT_WP_ADMIN_PASS} \
-			--admin_email=${VAULT_WP_EMAIL}
+		if docker compose -f test/docker-compose.test.yml run --rm\
+			   wordpress-cli wp core install \
+			   --url=http://wordpress \
+			   --title='testlab' \
+			   --admin_user=${VAULT_WP_ADMIN} \
+			   --admin_password=${VAULT_WP_ADMIN_PASS} \
+			   --admin_email=${VAULT_WP_EMAIL};
+    then
+       echo "Success: WordPress installed successfully.
+			 
+			 Test environment is ready."
 fi
