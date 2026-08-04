@@ -27,7 +27,7 @@ while read -r image; do
     echo "Scanning $image..."
 
     REPORT_FILE="$(echo "$image" | tr '/:' '__').json"
-    success=false
+    success=0
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
     for attempt in 1 2 3; do
@@ -47,9 +47,9 @@ while read -r image; do
 		    then
             echo "✓ Scan completed"
             rm -f "$LOG_FILE"
-            success=true
-					  ((scanned++))
-						((succeeded++))
+            success=1
+					  ((++scanned))
+						((++succeeded))
             break
         fi
         echo "Attempt $attempt failed"
@@ -61,8 +61,8 @@ while read -r image; do
 		
 		if (( ! success )); then
         echo "Skipping $image"
-				((scanned++))
-				((failed++))
+				((++scanned))
+				((++failed))
         printf "[%s] %s - failed after 3 attempts\n" \
                "$(date '+%F %T')" "$image" >> "$REPORT_DIR/skipped-images.txt"
     fi
