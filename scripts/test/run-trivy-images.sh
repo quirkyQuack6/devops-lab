@@ -80,8 +80,8 @@ if (( failed > 0 )); then
     echo
     echo "Failed images:"
     while IFS= read -r line; do
-        name = "${line#*]}"
-        echo "  -$name"
+        name="${line#*] }"
+        echo "  - $name"
     done < "$REPORT_DIR/skipped-images.txt"
 fi
 
