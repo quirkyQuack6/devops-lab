@@ -72,6 +72,18 @@ done < <(./scripts/test/get-docker-images.sh)
 echo -e "==========================
 Trivy image scan summary
 ==========================
-Scanned: $scanned
+Total images: $scanned
 Succeeded: $succeeded
 Failed: $failed"
+
+if (( failed > 0 )); then
+    echo
+    echo "Failed images:"
+    while IFS= read -r line; do
+        name = "${line#*]}"
+        echo "  -$name"
+    done < "$REPORT_DIR/skipped-images.txt"
+fi
+
+echo "Reports saved to:
+  test/reports/trivy/images"
