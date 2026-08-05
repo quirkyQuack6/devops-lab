@@ -52,6 +52,7 @@ while read -r image; do
             break
         fi
         echo "Attempt $attempt failed"
+				tail -n 10 "$LOG_FILE"
         if (( attempt != 3 )); then
             echo "Retrying..."
             sleep 10
