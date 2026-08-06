@@ -28,6 +28,7 @@ def configuration = [
   engineVersion: 2
 ]
 
+
 pipeline {
     agent any
 
@@ -158,7 +159,42 @@ pipeline {
                     }
                 }
                 sh "./scripts/test/copy-wpscan-report.sh"
-                sh "./scripts/test/check-report.sh"
+            }
+        }
+        stage('Trivy Config Scan') {
+            steps {
+                script {
+                    def hostWorkspace = env.WORKSPACE.replace(
+                        "/var/jenkins_home",
+                        "/opt/jenkins"
+                    )
+                    withEnv(["HOST_WORKSPACE=${hostWorkspace}"]) {
+                        sh "./scripts/test/run-trivy-config.sh"
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test/reports/trivy/*', fingerprint: true
+                }
+            }
+        }
+        stage('Trivy Image Scan') {
+            steps {
+                script {
+                    def hostWorkspace = env.WORKSPACE.replace(
+                        "/var/jenkins_home",
+                        "/opt/jenkins"
+                    )
+                    withEnv(["HOST_WORKSPACE=${hostWorkspace}"]) {
+                        sh "./scripts/test/run-trivy-images.sh"
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test/reports/trivy/**', fingerprint: true
+                }
             }
         }
     }

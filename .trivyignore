@@ -1,0 +1,3 @@
+# Jenkins container health is monitored externally.
+# Container lifecycle is managed through Docker Compose
+DS-0026
