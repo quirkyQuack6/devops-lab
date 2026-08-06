@@ -17,10 +17,14 @@ rm -f "$REPORT_DIR/skipped-images.txt"
 
 WORKSPACE="${HOST_WORKSPACE:-$PWD}"
 
+echo "Updating Trivy vulnerability database..."
+
 docker run --rm \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
-    image --download-db-only
+    image --download-db-only --no-progress
+
+echo "✓ Database updated"
 
 while read -r image; do
     echo "Scanning $image..."
