@@ -52,7 +52,9 @@ while read -r image; do
             break
         fi
         echo "Attempt $attempt failed"
+				echo "----- Trivy output -----"
 				tail -n 10 "$LOG_FILE"
+				echo "------------------------"
         if (( attempt != 3 )); then
             echo "Retrying..."
             sleep 10

@@ -19,9 +19,8 @@ if docker compose -f test/docker-compose.test.yml run --rm \
 			   --admin_password="${VAULT_WP_ADMIN_PASS}" \
 			   --admin_email="${VAULT_WP_EMAIL}";
 then
-   echo "Success: WordPress installed successfully.
-			 
-   Test environment is ready."
+   echo
+   echo "Test environment is ready."
 else
    echo "Error: WordPress installation failed."
    exit 1
