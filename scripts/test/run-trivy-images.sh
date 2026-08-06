@@ -91,6 +91,7 @@ if (( failed > 0 )); then
     done < "$REPORT_DIR/skipped-images.txt"
 fi
 
+echo
 echo "Reports saved to:
   test/reports/trivy/images
 =========================="
