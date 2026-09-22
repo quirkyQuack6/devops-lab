@@ -39,7 +39,7 @@ docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
 		--enumerate vp,vt,u \
 		--verbose \
     --format json \
-		--output /reports/wpscan-report.json
+		--output /reports/wpscan-report.json || scan_status=$?
 
 if [ "$scan_status" -ne 0 ] && [ "$scan_status" -ne 5 ]; then
     echo "ERROR: WPScan terminated with unexpected exit code: $scan_status"
@@ -68,7 +68,7 @@ JQ_FILTER='
 	| map(select((.vulns | length) > 0))
 	| map(. as $i | $i.vulns[] | { component: $i.name, ver: $i.ver, title: (.title // "unknown") })
 	| .[]
-	| [ (if (.ver == null or .ver == "") then "unconfirmed" else "confirmed" end)
+	| [ (if (.ver == null or .ver == "") then "unconfirmed" else "confirmed" end),
       .component, (.ver // "version-not-detected"), .title ]
 	| @tsv
 '
@@ -106,21 +106,21 @@ print("\n".join(rows))
 PY
 )"
 else
-  echo "ERROR: neither jq nor python3 is avaliable to analyze $REPORT_FILE"
+  echo "ERROR: neither jq nor python3 is available to analyze $REPORT_FILE"
 	exit 1
 fi
 
 confirmed="$(printf '%s\n' "$findings" | awk -F'\t' '$1=="confirmed"{c++} END{print c+0}')"
 unconfirmed="$(printf '%s\n' "$findings" | awk -F'\t' '$1=="unconfirmed"{c++} END{print c+0}')"
 
-if ["$confirmed" -gt 0 ]; then
+if [ "$confirmed" -gt 0 ]; then
 	echo "ERROR: confirmed vulnerabilities detected."
 	printf '%s\n' "$findings" | awk -F'\t' '$1=="confirmed"{printf " - %s (version %s): %s\n", $2, $3, $4}'
   echo "Report: test/reports/wpscan-report.json"
 	exit 5
 fi
 
-if ["$unconfirmed" -gt 0 ]; then
+if [ "$unconfirmed" -gt 0 ]; then
   echo "WARNING: $unconfirmed finding(s) on components whose version could not be detected."
 	echo "WPScan assumes the worst case for such components; nothing is confirmed -> non-fatal"
 	printf '%s\n' "$findings" | awk -F'\t' '$1=="unconfirmed"{printf " - %s: %s\n", $2, $4}'
@@ -132,7 +132,7 @@ WPScan summary
 Target: http://wordpress
 Report: test/reports/wpscan-report.json
 WPScan exit code: $scan_status
-Confirned vulnerabilities: $confirmed
+Confirmed vulnerabilities: $confirmed
 Unconfirmed findings: $unconfirmed
 Status: completed"
 
