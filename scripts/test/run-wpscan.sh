@@ -7,8 +7,11 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$REPO_ROOT"
 
+HOST_REPO_ROOT="$(printf '%s' "$REPO_ROOT" | sed 's|^/var/jenkins_home|/opt/jenkins|')"
+
 mkdir -p "$REPO_ROOT/test/reports"
 chmod 777 "$REPO_ROOT/test/reports"
+export HOST_REPORTS_DIR="$HOST_REPO_ROOT/test/reports"
 
 if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		echo "ERROR: VAULT_WPSCAN_API_TOKEN is not set"
