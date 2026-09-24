@@ -44,7 +44,7 @@ while read -r image; do
             --no-progress \
             --skip-db-update \
             --offline-scan \
-            --timeout 10m
+            --timeout 10m \
             --format json \
             --output "/reports/$REPORT_FILE" \
             "$image" \
