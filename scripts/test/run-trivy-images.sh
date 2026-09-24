@@ -43,7 +43,6 @@ while read -r image; do
             --scanners vuln \
             --no-progress \
             --skip-db-update \
-            --offline-scan \
             --timeout 10m \
             --format json \
             --output "/reports/$REPORT_FILE" \
