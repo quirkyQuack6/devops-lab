@@ -17,6 +17,20 @@ rm -f "$REPORT_DIR/skipped-images.txt"
 
 WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/opt/jenkins|')}"
 
+# Function to clean up stale lock files from Trivy cache volume
+# When Trivy is killed with SIGKILL, it cannot release locks properly,
+# leaving .lock files that block subsequent runs
+cleanup_cache_locks() {
+    echo "Cleaning up Trivy cache locks..."
+    docker run --rm \
+        -v trivy-cache:/root/.cache/trivy \
+        alpine:latest \
+        sh -c 'find /root/,cache/trivy -name "*.lock" -type f -delete 2>/dev/null || true'
+    echo "✓ Cache locks cleaned"
+}	
+
+cleanup_cache_locks
+
 echo "Updating Trivy vulnerability database..."
 
 docker run --rm \
@@ -33,6 +47,8 @@ while read -r image; do
     success=0
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
+    cleanup_cache_locks
+
     for attempt in 1 2 3; do
         if timeout --signal=KILL 12m docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
@@ -43,6 +59,7 @@ while read -r image; do
             --scanners vuln \
             --no-progress \
             --skip-db-update \
+						--offline-scan \
             --timeout 10m \
             --format json \
             --output "/reports/$REPORT_FILE" \
