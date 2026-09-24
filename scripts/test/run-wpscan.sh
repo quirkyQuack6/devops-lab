@@ -8,6 +8,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 mkdir -p "$REPO_ROOT/test/reports"
+chmod 777 "$REPO_ROOT/test/reports"
 
 if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 		echo "ERROR: VAULT_WPSCAN_API_TOKEN is not set"
@@ -15,11 +16,6 @@ if [ -z "${VAULT_WPSCAN_API_TOKEN:-}" ]; then
 fi
 
 REPORT_FILE="$REPO_ROOT/test/reports/wpscan-report.json"
-
-docker compose \
-	--profile tools \
-	-f test/docker-compose.test.yml \
-	run --rm wpscan-init
 
 echo "Starting WPScan container..."
 
