@@ -8,6 +8,9 @@ db_data/
 wp_data/
 grafana_data/
 
+# Отчеты сканирования
+test/reports
+
 # Специфичные файлы для Linux/Архивов
 .DS_Store
 
