@@ -65,18 +65,6 @@ services:
     volumes:
       - wp_data:/var/www/html
 
-  wpscan-init:
-    image: alpine
-    volumes:
-      - wpscan_reports:/reports
-    command:
-      - sh
-      - -c
-      - |
-        chown -R 1000:1000 /reports
-    profiles:
-      - tools
-
   wpscan:
     image: wpscanteam/wpscan
     profiles:
@@ -86,9 +74,8 @@ services:
     environment:
       - WPSCAN_API_TOKEN=${VAULT_WPSCAN_API_TOKEN:-unused}
     volumes:
-      - wpscan_reports:/reports
+      - ${HOST_REPORTS_DIR:-./reports}:/reports
 
 volumes:
   db_data:
   wp_data:
-  wpscan_reports:

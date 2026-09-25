@@ -158,7 +158,14 @@ pipeline {
                         sh "./scripts/test/run-wpscan.sh"
                     }
                 }
-                sh "./scripts/test/copy-wpscan-report.sh"
+                // sh "./scripts/test/copy-wpscan-report.sh"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test/reports/wpscan-report.json',
+                                     allowEmptyArchive: true,
+                                     fingerprint: false
+                }
             }
         }
         stage('Trivy Config Scan') {
@@ -175,7 +182,9 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'test/reports/trivy/*', fingerprint: true
+                    archiveArtifacts artifacts: 'test/reports/trivy/*',
+                                     allowEmptyArchive: true,
+                                     fingerprint: true
                 }
             }
         }
@@ -193,7 +202,9 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'test/reports/trivy/**', fingerprint: true
+                    archiveArtifacts artifacts: 'test/reports/trivy/**',
+                                     allowEmptyArchive: true,
+                                     fingerprint: true
                 }
             }
         }
@@ -203,7 +214,7 @@ pipeline {
 
         always {
             archiveArtifacts( 
-                artifacts: 'test/reports/*.json', 
+                artifacts: 'test/reports/**/*.json', 
                 allowEmptyArchive: true
             )
         }

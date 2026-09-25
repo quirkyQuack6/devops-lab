@@ -14,14 +14,6 @@ REPORT_DIR="test/reports/trivy"
 
 mkdir -p "$REPORT_DIR"
 
-# Отладка
-#echo "PWD=$(pwd)"
-#echo "REPORT_DIR=$REPORT_DIR"
-#ls -la
-#ls -la test
-#ls -la test/reports || true
-#find . -maxdepth 2 -type f | sort
-
 COMMON_ARGS=(
 		config .
 		--ignorefile .trivyignore
@@ -33,7 +25,7 @@ COMMON_ARGS=(
 docker run --rm \
 	-v "$WORKSPACE":/work \
 	-w /work \
-	aquasec/trivy:0.72.0 \
+	aquasec/trivy:0.74.0 \
 	"${COMMON_ARGS[@]}" \
 	--format json \
 	--output "$REPORT_DIR/config.json"
@@ -41,7 +33,7 @@ docker run --rm \
 docker run --rm \
 	-v "$WORKSPACE":/work \
 	-w /work \
-	aquasec/trivy:0.72.0 \
+	aquasec/trivy:0.74.0 \
 	"${COMMON_ARGS[@]}" \
 	--format table \
 	--output "$REPORT_DIR/config.txt"

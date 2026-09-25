@@ -15,7 +15,7 @@ failed=0
 mkdir -p "$REPORT_DIR"
 rm -f "$REPORT_DIR/skipped-images.txt"
 
-WORKSPACE="${HOST_WORKSPACE:-$PWD}"
+WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/opt/jenkins|')}"
 
 echo "Updating Trivy vulnerability database..."
 
@@ -34,7 +34,7 @@ while read -r image; do
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
     for attempt in 1 2 3; do
-        if timeout 5m docker run --rm \
+        if timeout --signal=TERM 5m docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v trivy-cache:/root/.cache/trivy \
             -v "$WORKSPACE/$REPORT_DIR":/reports \
@@ -43,6 +43,7 @@ while read -r image; do
             --scanners vuln \
             --no-progress \
             --skip-db-update \
+						--skip-version-check \
             --format json \
             --output "/reports/$REPORT_FILE" \
             "$image" \
