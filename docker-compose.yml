@@ -38,7 +38,12 @@ services:
       - WORDPRESS_DB_USER=${MYSQL_USER}
       - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
       - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
-      - WORDPRESS_CONFIG_EXTRA=define('WP_REDIS_HOST', 'redis'); define('WP_REDIS_PORT', 6379); define('WP_REDIS_DATABASE', 1);
+      - WORDPRESS_CONFIG_EXTRA=
+          define('WP_REDIS_HOST', 'redis'); 
+          define('WP_REDIS_PORT', 6379); 
+          define('WP_REDIS_DATABASE', 1);
+          define('WP_HOME', 'http://192.168.122.204:8000');
+          define('WP_SITEURL', 'http://192.168.122.204:8000');
       - WORDPRESS_DEBUG=1
       - WORDPRESS_DEBUG_DISPLAY=1
     networks:
@@ -60,6 +65,16 @@ services:
       - monitor-net
     depends_on:
       - db
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:0.28.0
+    container_name: blackbox-exporter
+    restart: unless-stopped
+    volumes:
+      - ./config/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    networks:
+      - wp-internal-net
+      - monitor-net
 
   node-exporter:
     image: prom/node-exporter:latest
