@@ -36,8 +36,10 @@ while read -r image; do
     success=0
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
+    # Добавлен --tmpfs /tmp для гарантии доступности временной директории
     for attempt in 1 2 3; do
         if timeout --signal=TERM 2m docker run --rm \
+            --tmpfs /tmp \
             -e HTTP_PROXY="${HTTP_PROXY:-}" \
             -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
             -e NO_PROXY="${NO_PROXY:-}" \
