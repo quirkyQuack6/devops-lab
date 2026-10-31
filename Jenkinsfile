@@ -38,6 +38,12 @@ pipeline {
     }
 
     environment {
+        // Proxy settings for Russian internet restrictions
+        HTTP_PROXY = 'http://192.168.122.1:10808'
+        HTTPS_PROXY = 'http://192.168.122.1:10808'
+        NO_PROXY = 'localhost,127.0.0.1,192.168.122.0/24'
+
+
         ANSIBLE_PRIVATE_KEY_FILE = "/var/jenkins_home/.ssh/id_ed25519"
     }
 

@@ -20,6 +20,9 @@ WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/o
 echo "Updating Trivy vulnerability database..."
 
 docker run --rm \
+    -e HTTP_PROXY="${HTTP_PROXY:-}" \
+    -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+    -e NO_PROXY="${NO_PROXY:-}" \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
     image --download-db-only --no-progress
@@ -34,7 +37,10 @@ while read -r image; do
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
     for attempt in 1 2 3; do
-        if timeout --signal=TERM 5m docker run --rm \
+        if timeout --signal=TERM 2m docker run --rm \
+            -e HTTP_PROXY="${HTTP_PROXY:-}" \
+            -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+            -e NO_PROXY="${NO_PROXY:-}" \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v trivy-cache:/root/.cache/trivy \
             -v "$WORKSPACE/$REPORT_DIR":/reports \
