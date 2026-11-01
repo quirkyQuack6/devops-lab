@@ -15,7 +15,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${VAULT_MYSQL_ROOT_PASS}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 30s
     networks: 
       - wp-test-net
@@ -50,11 +50,11 @@ services:
 
   wordpress-cli:
     image: wordpress:cli
+    user: "33:33"
     profiles:
       - tools
     depends_on:
-      wordpress:
-        condition: service_healthy
+      - wordpress
     environment:
       - WORDPRESS_DB_HOST=db:3306
       - WORDPRESS_DB_USER=${VAULT_MYSQL_USER:-wordpress}

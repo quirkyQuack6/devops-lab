@@ -19,13 +19,17 @@ WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/o
 
 echo "Updating Trivy vulnerability database..."
 
-docker run --rm \
-    -e HTTP_PROXY="${HTTP_PROXY:-}" \
-    -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
-    -e NO_PROXY="${NO_PROXY:-}" \
+if ! timeout 3m docker run --rm \
+    #-e HTTP_PROXY="${HTTP_PROXY:-}" \
+    #-e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+    #-e NO_PROXY="${NO_PROXY:-}" \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
-    image --download-db-only --no-progress
+    image --download-db-only --no-progress \
+		--db-repository ghcr.io/aquasec/trivy-db:2; then
+    echo "Error: Failed to download Trivy DB within 3 minutes. Check proxy/network."
+		exit 1
+fi
 
 echo "✓ Database updated"
 
@@ -36,10 +40,8 @@ while read -r image; do
     success=0
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
-    # Добавлен --tmpfs /tmp для гарантии доступности временной директории
     for attempt in 1 2 3; do
         if timeout --signal=TERM 2m docker run --rm \
-            --tmpfs /tmp \
             -e HTTP_PROXY="${HTTP_PROXY:-}" \
             -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
             -e NO_PROXY="${NO_PROXY:-}" \
@@ -50,6 +52,7 @@ while read -r image; do
             image \
             --scanners vuln \
             --no-progress \
+						--skip-files "*.map" \
             --skip-db-update \
 						--skip-version-check \
             --format json \
