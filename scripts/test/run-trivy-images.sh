@@ -20,16 +20,9 @@ WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/o
 echo "Updating Trivy vulnerability database..."
 
 if ! timeout 3m docker run --rm \
-    -e http_proxy="${HTTP_PROXY:-}" \
-    -e https_proxy="${HTTPS_PROXY:-}" \
-    -e no_proxy="${NO_PROXY:-}" \
-    -e HTTP_PROXY="${HTTP_PROXY:-}" \
-    -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
-    -e NO_PROXY="${NO_PROXY:-}" \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
-    image --download-db-only --no-progress \
-    --db-repository public.ecr.aws/aquasecurity/trivy-db; then
+    image --download-db-only --no-progress; then
     echo "Error: Failed to download Trivy DB within 3 minutes. Check proxy/network."
 		exit 1
 fi
