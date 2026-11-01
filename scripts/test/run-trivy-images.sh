@@ -29,7 +29,7 @@ if ! timeout 3m docker run --rm \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
     image --download-db-only --no-progress \
-    --db-repository public.ecr.aws/aquasecurity/trivy-db; then
+    --db-repository aquasec/trivy-db; then
     echo "Error: Failed to download Trivy DB within 3 minutes. Check proxy/network."
 		exit 1
 fi
