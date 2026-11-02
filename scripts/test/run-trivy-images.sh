@@ -54,6 +54,7 @@ while read -r image; do
             --no-progress \
             --skip-db-update \
 						--skip-version-check \
+						--skip-dirs "/usr/share/grafana/data/plugins-bundled" \
 						--skip-files "*.map" \
 						--skip-files "*.so" \
 						--skip-files "*.so.*" \
