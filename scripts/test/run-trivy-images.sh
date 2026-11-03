@@ -47,14 +47,16 @@ while read -r image; do
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v trivy-cache:/root/.cache/trivy \
             -v "$WORKSPACE/$REPORT_DIR":/reports \
+						--network host \
             aquasec/trivy:0.72.0 \
             image \
+						--offline-scan \
 						--timeout 30m \
             --scanners vuln \
             --no-progress \
             --skip-db-update \
 						--skip-version-check \
-						--skip-dirs "/usr/share/grafana/plugins-bundled" \
+						--skip-dirs "/usr/share/grafana/data/plugins-bundled" \
 						--skip-dirs "/usr/share/grafana/public" \
 						--skip-dirs "/var/lib/grafana/plugins" \
 						--skip-files "*.map" \
