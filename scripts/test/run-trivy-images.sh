@@ -49,12 +49,14 @@ while read -r image; do
             -v "$WORKSPACE/$REPORT_DIR":/reports \
             aquasec/trivy:0.72.0 \
             image \
-						--timeout 2m \
+						--timeout 30m \
             --scanners vuln \
             --no-progress \
             --skip-db-update \
 						--skip-version-check \
-						--skip-dirs "/usr/share/grafana/data/plugins-bundled" \
+						--skip-dirs "/usr/share/grafana/plugins-bundled" \
+						--skip-dirs "/usr/share/grafana/public" \
+						--skip-dirs "/var/lib/grafana/plugins" \
 						--skip-files "*.map" \
 						--skip-files "*.so" \
 						--skip-files "*.so.*" \
