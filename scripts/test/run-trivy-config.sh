@@ -23,6 +23,9 @@ COMMON_ARGS=(
 )
 
 docker run --rm \
+  -e HTTP_PROXY="${HTTP_PROXY:-}" \
+  -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+  -e NO_PROXY="${NO_PROXY:-}" \
 	-v "$WORKSPACE":/work \
 	-w /work \
 	aquasec/trivy:0.74.0 \
@@ -31,6 +34,9 @@ docker run --rm \
 	--output "$REPORT_DIR/config.json"
 
 docker run --rm \
+  -e HTTP_PROXY="${HTTP_PROXY:-}" \
+  -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+  -e NO_PROXY="${NO_PROXY:-}" \
 	-v "$WORKSPACE":/work \
 	-w /work \
 	aquasec/trivy:0.74.0 \

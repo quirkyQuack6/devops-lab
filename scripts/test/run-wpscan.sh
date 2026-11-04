@@ -30,6 +30,11 @@ echo "Starting WPScan container..."
 # WPScan reports EVERY known CVE for components whose version it could not
 # detect (e.g. plugin readme.txt answers HTTP 403). Such findings are
 # unconfirmed and must not fail the pipeline.
+#
+# WPScan runs with --no-update flag, using only the local vulnerability
+# database embedded in the Docker image. No internet access required,
+# so proxy configuration is not passed to the container.
+# If --no-update is removed in the future, add -e HTTP_PROXY/HTTPS_PROXY flags.
 scan_status=0
 docker compose --profile tools -f test/docker-compose.test.yml run --rm -T \
 		wpscan \

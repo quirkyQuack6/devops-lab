@@ -19,10 +19,13 @@ WORKSPACE="${HOST_WORKSPACE:-$(printf '%s' "$PWD" | sed 's|^/var/jenkins_home|/o
 
 echo "Updating Trivy vulnerability database..."
 
-docker run --rm \
+if ! timeout 3m docker run --rm \
     -v trivy-cache:/root/.cache/trivy \
     aquasec/trivy:0.72.0 \
-    image --download-db-only --no-progress
+    image --download-db-only --no-progress; then
+    echo "Error: Failed to download Trivy DB within 3 minutes. Check proxy/network."
+		exit 1
+fi
 
 echo "✓ Database updated"
 
@@ -34,16 +37,31 @@ while read -r image; do
     LOG_FILE="$REPORT_DIR/$(echo "$image" | tr '/:' '__').error.log"
 
     for attempt in 1 2 3; do
-        if timeout --signal=TERM 5m docker run --rm \
+        if docker run --rm \
+            -e http_proxy="${HTTP_PROXY:-}" \
+            -e https_proxy="${HTTPS_PROXY:-}" \
+            -e no_proxy="${NO_PROXY:-}" \
+            -e HTTP_PROXY="${HTTP_PROXY:-}" \
+            -e HTTPS_PROXY="${HTTPS_PROXY:-}" \
+            -e NO_PROXY="${NO_PROXY:-}" \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v trivy-cache:/root/.cache/trivy \
             -v "$WORKSPACE/$REPORT_DIR":/reports \
+						--network host \
             aquasec/trivy:0.72.0 \
             image \
+						--offline-scan \
+						--timeout 30m \
             --scanners vuln \
             --no-progress \
             --skip-db-update \
 						--skip-version-check \
+						--skip-dirs "/usr/share/grafana/data/plugins-bundled" \
+						--skip-dirs "/usr/share/grafana/public" \
+						--skip-dirs "/var/lib/grafana/plugins" \
+						--skip-files "*.map" \
+						--skip-files "*.so" \
+						--skip-files "*.so.*" \
             --format json \
             --output "/reports/$REPORT_FILE" \
             "$image" \
